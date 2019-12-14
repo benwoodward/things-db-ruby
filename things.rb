@@ -7,39 +7,31 @@ require 'octokit'
 require 'json'
 
 DEFAULT_DB="/Users/#{`whoami`.chop}/Library/Containers/com.culturedcode.ThingsMac/Data/Library/Application Support/Cultured Code/Things/Things.sqlite3"
-GIST_ID=ENV['GIST_ID']
-GITHUB_THINGS_TOKEN=ENV['GITHUB_THINGS_TOKEN']
-MAX_MINUTES=30
-
 DB = Sequel.sqlite(DEFAULT_DB)
 
-tasks = []
+GIST_ID=ENV['GIST_ID']
+GITHUB_THINGS_TOKEN=ENV['GITHUB_THINGS_TOKEN']
+MAX_MINUTES=8*60
 
-# {
-#   :uuid=>"149B52B7-97BD-4D39-923A-BDS6A4733DBC",
-#   :trashed=>0,
-#   :type=>0,
-#   :title=>"test title",
-#   :status=>3,
-#   :stopDate=>1515566876.735473,
-#   :start=>1,
-#   :startDate=>1512345600.0,
-#   :area=>nil,
-#   :project=>nil,
-# }
+def duration_in_minutes(tags)
+  dur_tag = tags.select {|tag| tag.title =~ /dur:/}.first
+  if dur_tag.nil?
+    return "15"
+  else
+    extract_minutes_from_dur_string(dur_tag.title)
+  end
+end
 
-def duration_in_minutes(duration)
-  return "15" if duration.nil?
-
-  if duration =~ /m|min/
-    minute_string_to_minutes(duration)
-  elsif duration =~ /h|hr|hour/
-    hour_string_to_minutes(duration)
+def extract_minutes_from_dur_string(str)
+  if str =~ /m|min/
+    minute_string_to_minutes(str)
+  elsif str =~ /h|hr|hour/
+    hour_string_to_minutes(str)
   end
 end
 
 def extract_number_from_string(str)
-  str.gsub(/[a-zA-Z]/, '')
+  str.gsub(/[a-zA-Z:]/, '').to_i
 end
 
 def minute_string_to_minutes(duration)
@@ -48,45 +40,77 @@ end
 
 def hour_string_to_minutes(duration)
   hours = extract_number_from_string(duration)
-  (hours * 60).to_i
+  (hours.to_i * 60).to_i
 end
 
 def things_url(id)
   "things:///show?id=#{id}"
 end
 
+class Task < Sequel::Model(DB[:TMTask])
+  many_to_many :tags, left_key: :tasks, right_key: :tags,
+    join_table: :TMTaskTag
+end
 
+class Tag < Sequel::Model(DB[:TMTag])
+  many_to_many :tasks, left_key: :tags, right_key: :tasks,
+    join_table: :TMTaskTag
+end
 
-task_rows = DB["
-SELECT *
-FROM TMTask as TASK
-WHERE TASK.trashed = 0 AND TASK.status = 0 AND TASK.type = 0
-AND TASK.start = 1
-AND TASK.startdate is NOT NULL
-ORDER BY TASK.todayIndex
-LIMIT 10
-"]
+def contains_urgent_tag?(tags)
+  tags.select {|tag| tag.title == 'URGENT!'}.count > 0
+end
 
+def contains_high_imp_tag?(tags)
+  tags.select {|tag| tag.title == 'imp:high'}.count > 0
+end
+
+def contains_med_imp_tag?(tags)
+  tags.select {|tag| tag.title == 'imp:medium'}.count > 0
+end
+
+def reprioritise(tasks)
+  [:contains_med_imp_tag?, :contains_high_imp_tag?, :contains_urgent_tag?].inject(tasks) do |reordered_tasks, filter_method|
+    reordered_tasks = apply_filter(reordered_tasks, filter_method)
+  end
+end
+
+def apply_filter(tasks, filter_method)
+  tasks.partition do |task|
+    send filter_method, task.tags
+  end.flatten
+end
+
+tasks = Task.eager(:tags)
+  .where(trashed: 0, status: 0, type: 0, start: 1)
+  .where(Sequel.~(startdate: nil))
+  .order(:todayIndex)
+  .limit(10)
+
+reprioritised_tasks = reprioritise(tasks)
+
+todays_tasks = []
 combined_duration = 0
 
-task_rows.each do |row|
-  duration = duration_in_minutes(row[:duration])
+reprioritised_tasks.each do |task|
+  duration = duration_in_minutes(task.tags)
 
   task = {
-    things_url: things_url(row[:uuid]),
-    title: row[:title],
+    things_url: things_url(task[:uuid]),
+    title: task[:title],
     duration: duration
   }
 
-  tasks << JSON.generate(task)
+  todays_tasks << JSON.generate(task)
 
   break if combined_duration >= MAX_MINUTES
   combined_duration += duration.to_i
 end
 
+
 client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
-output = tasks.join(',')
+output = todays_tasks.join(',')
 puts output
 
 client.edit_gist(GIST_ID, {
