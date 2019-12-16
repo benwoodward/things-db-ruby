@@ -182,64 +182,76 @@ morning, afternoon, evening, anytime = group_by_time_of_day(tasks)
 #   key: [[], []],
 #   key: [[], []]
 # }
-time_groups = {
-  morning: group_by_task_type(morning),
-  afternoon: group_by_task_type(afternoon),
-  evening: group_by_task_type(evening),
-  anytime: group_by_task_type(anytime)
-}
+time_groups = [
+  group_by_task_type(morning),
+  group_by_task_type(afternoon),
+  group_by_task_type(evening),
+  group_by_task_type(anytime)
+]
 
-# time_groups.each do |name, group|
-#   puts "\n\n\n"
-#   puts name
-#   puts "======="
-#   group.each do |item|
-#     puts item.map {|item| item.title}
-#     puts "---\n\n"
-#   end
-# end
+
+time_groups.each do |time_group|
+  puts "\n::::TIME GROUP::::"
+  puts "======="
+  time_group.each do |task_group|
+    puts "\n::::task group::::"
+    puts "======="
+    task_group.each do |task|
+      puts task.title
+    end
+  end
+  puts "\n\n"
+end
 
 # should return task groups for each time of the day,
 # but arranged so that the most important task groups
 # come first
 
-importance_sorted_task_groups = []
 # time_groups:
 # {
-#   key: [[task, task], [task]]
+#   [[task, task], [task]]
 # }
 # for each time_group, order the task_groups by each imp: tag, based on whether
 # a task group contains a task with that tag
-time_groups.each do |time_of_day, task_groups|
-  sorted_task_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject([]) do |sorted_by_tag, tag_name|
+importance_sorted_task_groups = time_groups.inject([]) do |sorted_time_groups, time_group|
+  sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
 
+    new_sorting = sorted_task_groups
     # task_groups:
     # [[task, task], [task]]
-    task_groups.inject([]) do |sorted_task_groups, task_group|
-      time_group_sorting = []
+    sorted_task_groups.each_with_index do |task_group, index|
 
       # task_group:
       # [task, task]
       all_tags_in_group = task_group.map {|task| task.tags}.flatten
 
+      # move those with tag to front on each operation, otherwise leave where they are
       if contains_specified_tags?(all_tags_in_group, [tag_name])
-        time_group_sorting.unshift task_group
-      else
-        time_group_sorting.push task_group
+        new_sorting.delete_at(index)
+        new_sorting.unshift task_group
       end
-
-      sorted_task_groups.push time_group_sorting
     end
+
+    new_sorting
   end
 
-  importance_sorted_task_groups.push sorted_task_group
+  sorted_time_groups << sorted_time_group
 end
 
 # puts "====="
 # puts sorted_task_groups.flatten.map {|task| task.title}
 # puts "=====\n\n"
-importance_sorted_task_groups.flatten.each do |task|
-  puts task.title
+importance_sorted_task_groups.each do |time_group|
+  puts "\n::::IMP. Sorted TIME GROUP::::"
+  puts "======="
+  time_group.each do |task_group|
+    puts "\n::::task group::::"
+    puts "======="
+    task_group.each do |task|
+      puts task.title
+    end
+  end
+  puts "\n\n"
 end
 
 tasks = sorted3_order(importance_sorted_task_groups)
