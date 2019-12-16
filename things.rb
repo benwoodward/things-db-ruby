@@ -89,6 +89,8 @@ def group_by_task_type(tasks)
   errands = []
   chores = []
   admin = []
+  focussed_work = []
+  downtime = []
   other = []
 
   tasks.each do |task|
@@ -98,6 +100,10 @@ def group_by_task_type(tasks)
       chores << task
     elsif contains_specified_tags?(task.tags, ['what:admin', 'what:phonecall', 'what:email', 'what:message'])
       admin << task
+    elsif contains_specified_tags?(task.tags, ['what:focussed-work', 'what:code', 'what:research'])
+      focussed_work << task
+    elsif contains_specified_tags?(task.tags, ['what:downtime', 'what:to-watch', 'what:to-read'])
+      downtime << task
     else
       other << task
     end
@@ -107,7 +113,7 @@ def group_by_task_type(tasks)
 
   result = []
 
-  [chores, other, errands, admin].each do |grouping|
+  [chores, focussed_work, other, errands, admin, downtime].each do |grouping|
     result << grouping if !grouping.empty?
   end
 
@@ -204,9 +210,10 @@ importance_sorted_task_groups = []
 # }
 time_groups.each do |time_of_day, task_groups|
   sorted_task_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject([]) do |sorted_by_tag, tag_name|
+
     # task_groups:
     # [[task, task], [task]]
-    sorted_by_tag = task_groups.inject([]) do |sorted_task_groups, task_group|
+    task_groups.inject([]) do |sorted_task_groups, task_group|
       time_group_sorting = []
 
       # task_group:
