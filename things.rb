@@ -208,6 +208,8 @@ importance_sorted_task_groups = []
 # {
 #   key: [[task, task], [task]]
 # }
+# for each time_group, order the task_groups by each imp: tag, based on whether
+# a task group contains a task with that tag
 time_groups.each do |time_of_day, task_groups|
   sorted_task_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject([]) do |sorted_by_tag, tag_name|
 
