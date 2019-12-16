@@ -57,28 +57,44 @@ class Tag < Sequel::Model(DB[:TMTag])
     join_table: :TMTaskTag
 end
 
-def contains_urgent_tag?(tags)
-  tags.select {|tag| tag.title == 'imp:URGENT!'}.count > 0
+def contains_specified_tags?(task, tag_names)
+  task.tags.select {|tag| tag_names.include?(tag.title) }.count > 0
 end
 
-def contains_high_imp_tag?(tags)
-  tags.select {|tag| tag.title == 'imp:high'}.count > 0
-end
-
-def contains_med_imp_tag?(tags)
-  tags.select {|tag| tag.title == 'imp:medium'}.count > 0
-end
+# errand ['what:errand', 'what:shopping-trip', 'what:appointment']
+# admin ['what:admin', 'what:shopping-trip', 'what:appointment']
 
 def order_by_importance(tasks)
-  [:contains_med_imp_tag?, :contains_high_imp_tag?, :contains_urgent_tag?].inject(tasks) do |reordered_tasks, filter_method|
-    reordered_tasks = apply_filter(reordered_tasks, filter_method)
+  ['imp:medium', 'imp:high', 'imp:urgent'].inject(tasks) do |reordered_tasks, tag_name|
+    reordered_tasks = apply_filter(reordered_tasks, tag_name)
   end
 end
 
-def apply_filter(tasks, filter_method)
+def apply_filter(tasks, tag_name)
   tasks.partition do |task|
-    self.send filter_method, task.tags
+    contains_specified_tags? task, [tag_name]
   end.flatten
+end
+
+# Urgent happens first thing
+# Then group tasks together
+# Then group subgroups into bigger groups
+#   Admin:
+#     Phonecalls
+#     Emails
+#     Messages
+# Then order tasks by importance within groups
+# Then order groups manually
+
+def group_by_task_type(tasks)
+  errands = []
+  chores = []
+  admin = []
+
+  # tasks.each do |task|
+    # case task.tags
+      # contains_errand_tag?
+  # end
 end
 
 def task_content(task)
@@ -128,6 +144,6 @@ ordered_by_importance.each do |task|
   puts task.title
 end
 
-client.edit_gist(GIST_ID, {
-  files: {"todays_tasks.json" => {content: "[#{output}]"}}
-})
+# client.edit_gist(GIST_ID, {
+  # files: {"todays_tasks.json" => {content: "[#{output}]"}}
+# })
