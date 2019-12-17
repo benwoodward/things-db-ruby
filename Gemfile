@@ -7,4 +7,6 @@ gem 'sqlite3'
 gem 'addressable'
 gem 'pry'
 gem "octokit", "~> 4.0"
+gem 'rspec'
+gem 'rake'
 

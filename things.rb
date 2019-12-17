@@ -263,23 +263,20 @@ importance_sorted_task_groups = task_importance_sorted_time_groups.inject([]) do
   sorted_time_groups << sorted_time_group
 end
 
-# puts "====="
-# puts sorted_task_groups.flatten.map {|task| task.title}
-# puts "=====\n\n"
-importance_sorted_task_groups.each do |time_group|
-  puts "\n::::IMP. Sorted TIME GROUP::::"
-  puts "======="
-  time_group.each do |task_group|
-    puts "\n::::task group::::"
-    puts "======="
-    task_group.each do |task|
-      puts task.title
-      puts '---'
-      puts task.tags.map {|tag| tag.title}.join(',')
-    end
-  end
-  puts "\n\n"
-end
+# importance_sorted_task_groups.each do |time_group|
+#   puts "\n::::IMP. Sorted TIME GROUP::::"
+#   puts "======="
+#   time_group.each do |task_group|
+#     puts "\n::::task group::::"
+#     puts "======="
+#     task_group.each do |task|
+#       puts task.title
+#       puts '---'
+#       puts task.tags.map {|tag| tag.title}.join(',')
+#     end
+#   end
+#   puts "\n\n"
+# end
 
 # importance_sorted_task_groups.each do |task|
 #   puts "\n\n===Task==="
@@ -311,9 +308,15 @@ end
 
 client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
-output = todays_tasks.join(',')
-
+def gist_content
+  todays_tasks.join(',')
+end
 
 # client.edit_gist(GIST_ID, {
   # files: {"todays_tasks.json" => {content: "[#{output}]"}}
 # })
+
+if $0 == __FILE__
+  raise ArgumentError, "Usage: #{$0} xh ym" unless ARGV.length > 0
+  puts output(ARGV.join(' '))
+end
