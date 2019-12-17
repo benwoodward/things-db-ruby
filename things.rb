@@ -6,12 +6,11 @@ require 'pry'
 require 'octokit'
 require 'json'
 
-DEFAULT_DB="/Users/#{`whoami`.chop}/Library/Containers/com.culturedcode.ThingsMac/Data/Library/Application Support/Cultured Code/Things/Things.sqlite3"
-DB = Sequel.sqlite(DEFAULT_DB)
+require './config'
+require './models/tag'
+require './models/task'
 
-GIST_ID=ENV['GIST_ID']
-GITHUB_THINGS_TOKEN=ENV['GITHUB_THINGS_TOKEN']
-MAX_MINUTES=8*60
+
 
 def duration_in_minutes(tags)
   dur_tag = tags.select {|tag| tag.title =~ /dur:/}.first
@@ -47,15 +46,7 @@ def things_url(id)
   "things:///show?id=#{id}"
 end
 
-class Task < Sequel::Model(DB[:TMTask])
-  many_to_many :tags, left_key: :tasks, right_key: :tags,
-    join_table: :TMTaskTag
-end
 
-class Tag < Sequel::Model(DB[:TMTag])
-  many_to_many :tasks, left_key: :tags, right_key: :tasks,
-    join_table: :TMTaskTag
-end
 
 def contains_specified_tags?(tags, tag_names)
   return false if tags.nil?
@@ -258,21 +249,21 @@ def importance_sorted_task_groups
   end
 end
 
-# importance_sorted_task_groups.each do |time_group|
-#   puts "\n::::IMP. Sorted TIME GROUP::::"
-#   puts "======="
-#   time_group.each do |task_group|
-#     puts "\n::::task group::::"
-#     puts "======="
-#     task_group.each do |task|
-#       puts task.title
-#       puts '---'
-#       puts "\n\n\n"
-#       puts task.tags.map {|tag| tag.title}.join(',')
-#     end
-#   end
-#   puts "\n\n"
-# end
+importance_sorted_task_groups.each do |time_group|
+  puts "\n::::IMP. Sorted TIME GROUP::::"
+  puts "======="
+  time_group.each do |task_group|
+    puts "\n::::task group::::"
+    puts "======="
+    task_group.each do |task|
+      puts task.title
+      puts '---'
+      puts task.tags.map {|tag| tag.title}.join(',')
+      puts "\n\n\n"
+    end
+  end
+  puts "\n\n"
+end
 
 # importance_sorted_task_groups.each do |task|
 #   puts "\n\n===Task==="
