@@ -164,9 +164,9 @@ end
 #   key: [[], []],
 #   key: [[], []]
 # }
-def time_groups
+def time_groups(tasks)
   # group tasks together by time of day
-  first_things, morning, afternoon, evening, anytime = group_by_time_of_day(group_by_task_type(db_tasks).flatten)
+  first_things, morning, afternoon, evening, anytime = group_by_time_of_day(tasks)
 
   [
     group_by_task_type(first_things),
@@ -199,7 +199,7 @@ def sort_task_group(task_group)
   end
 end
 
-def task_importance_sorted_time_groups
+def task_importance_sorted_time_groups(time_groups)
   time_groups.inject([]) do |updated_time_groups, time_group|
     updated_time_group = []
     time_group.each do |task_group|
@@ -222,8 +222,8 @@ end
 # a task group contains a task with that tag
 #
 # TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
-def importance_sorted_task_groups
-  task_importance_sorted_time_groups.inject([]) do |sorted_time_groups, time_group|
+def importance_sorted_task_groups(tasks)
+  tasks.inject([]) do |sorted_time_groups, time_group|
     sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
 
       new_sorting = sorted_task_groups
@@ -249,21 +249,21 @@ def importance_sorted_task_groups
   end
 end
 
-importance_sorted_task_groups.each do |time_group|
-  puts "\n::::IMP. Sorted TIME GROUP::::"
-  puts "======="
-  time_group.each do |task_group|
-    puts "\n::::task group::::"
-    puts "======="
-    task_group.each do |task|
-      puts task.title
-      puts '---'
-      puts task.tags.map {|tag| tag.title}.join(',')
-      puts "\n\n\n"
-    end
-  end
-  puts "\n\n"
-end
+# importance_sorted_task_groups.each do |time_group|
+#   puts "\n::::IMP. Sorted TIME GROUP::::"
+#   puts "======="
+#   time_group.each do |task_group|
+#     puts "\n::::task group::::"
+#     puts "======="
+#     task_group.each do |task|
+#       puts task.title
+#       puts '---'
+#       puts task.tags.map {|tag| tag.title}.join(',')
+#       puts "\n\n\n"
+#     end
+#   end
+#   puts "\n\n"
+# end
 
 # importance_sorted_task_groups.each do |task|
 #   puts "\n\n===Task==="
@@ -291,11 +291,36 @@ def todays_tasks_as_json(tasks)
     break if combined_duration >= MAX_MINUTES
     combined_duration += duration.to_i
   end
+
+  todays_tasks
 end
 
 
 def gist_content
-  tasks = sorted3_order(importance_sorted_task_groups.flatten)
+  tasks = db_tasks
+  tasks = group_by_task_type(tasks).flatten
+  tasks = time_groups(tasks)
+  tasks = task_importance_sorted_time_groups(tasks)
+  tasks = importance_sorted_task_groups(tasks)
+
+  tasks.each do |time_group|
+    puts "\n::::IMP. Sorted TIME GROUP::::"
+    puts "======="
+    time_group.each do |task_group|
+      puts "\n::::task group::::"
+      puts "======="
+      task_group.each do |task|
+        puts task.title
+        puts '---'
+        puts task.tags.map {|tag| tag.title}.join(',')
+        puts "\n\n\n"
+      end
+    end
+    puts "\n\n"
+  end
+
+  tasks = tasks.flatten
+  tasks = sorted3_order(tasks)
   todays_tasks_as_json(tasks).join(',')
 end
 
@@ -306,6 +331,8 @@ def push_to_gist
     files: {"todays_tasks.json" => {content: "[#{output}]"}}
   })
 end
+
+gist_content
 
 # if $0 == __FILE__
 #   raise ArgumentError, "Usage: #{$0} xh ym" unless ARGV.length > 0
