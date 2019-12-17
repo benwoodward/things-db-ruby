@@ -203,6 +203,23 @@ time_groups.each do |time_group|
   puts "\n\n"
 end
 
+def sort_task_group(task_group)
+  ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(task_group) do |reordered_tasks, tag_name|
+    reordered_tasks.partition do |task|
+      contains_specified_tags?(task.tags, [tag_name])
+    end.flatten
+  end
+end
+
+task_importance_sorted_time_groups = time_groups.inject([]) do |updated_time_groups, time_group|
+  updated_time_group = []
+  time_group.each do |task_group|
+    sorted_task_group = sort_task_group(task_group)
+    updated_time_group << sorted_task_group
+  end
+  updated_time_groups << updated_time_group
+end
+
 # should return task groups for each time of the day,
 # but arranged so that the most important task groups
 # come first
@@ -213,7 +230,9 @@ end
 # }
 # for each time_group, order the task_groups by each imp: tag, based on whether
 # a task group contains a task with that tag
-importance_sorted_task_groups = time_groups.inject([]) do |sorted_time_groups, time_group|
+#
+# TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
+importance_sorted_task_groups = task_importance_sorted_time_groups.inject([]) do |sorted_time_groups, time_group|
   sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
 
     new_sorting = sorted_task_groups
