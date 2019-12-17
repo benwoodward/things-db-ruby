@@ -155,11 +155,13 @@ def task_content(task)
   "#{task[:title]}#{newline_char}#{things_url(task[:uuid])}#{newline_char}#{task[:notes]}"
 end
 
-tasks = Task.eager(:tags)
-  .where(trashed: 0, status: 0, type: 0, start: 1)
-  .where(Sequel.~(startdate: nil))
-  .order(:todayIndex)
-  .limit(100)
+def db_tasks
+  Task.eager(:tags)
+    .where(trashed: 0, status: 0, type: 0, start: 1)
+    .where(Sequel.~(startdate: nil))
+    .order(:todayIndex)
+    .limit(100)
+end
 
 def sorted3_order(tasks)
   first_item = [tasks[0]]
@@ -167,33 +169,22 @@ def sorted3_order(tasks)
   first_item + reversed_list
 end
 
-tasks = group_by_task_type(tasks).flatten
-
-# Urgent happens first thing
-# Then group tasks together by time of day
-# Then group tasks by type within those groups
-# Then group subgroups into bigger groups
-#   Admin:
-#     Phonecalls
-#     Emails
-#     Messages
-# Then order tasks by group importance based on whether group contains important item
-# Then order groups manually
-
-# Then group tasks together by time of day
-first_things, morning, afternoon, evening, anytime = group_by_time_of_day(tasks)
-
 # {
 #   key: [[], []],
 #   key: [[], []]
 # }
-time_groups = [
-  group_by_task_type(first_things),
-  group_by_task_type(morning),
-  group_by_task_type(afternoon),
-  group_by_task_type(evening),
-  group_by_task_type(anytime)
-]
+def time_groups
+  # group tasks together by time of day
+  first_things, morning, afternoon, evening, anytime = group_by_time_of_day(group_by_task_type(db_tasks).flatten)
+
+  [
+    group_by_task_type(first_things),
+    group_by_task_type(morning),
+    group_by_task_type(afternoon),
+    group_by_task_type(evening),
+    group_by_task_type(anytime)
+  ]
+end
 
 
 # time_groups.each do |time_group|
@@ -217,13 +208,15 @@ def sort_task_group(task_group)
   end
 end
 
-task_importance_sorted_time_groups = time_groups.inject([]) do |updated_time_groups, time_group|
-  updated_time_group = []
-  time_group.each do |task_group|
-    sorted_task_group = sort_task_group(task_group)
-    updated_time_group << sorted_task_group
+def task_importance_sorted_time_groups
+  time_groups.inject([]) do |updated_time_groups, time_group|
+    updated_time_group = []
+    time_group.each do |task_group|
+      sorted_task_group = sort_task_group(task_group)
+      updated_time_group << sorted_task_group
+    end
+    updated_time_groups << updated_time_group
   end
-  updated_time_groups << updated_time_group
 end
 
 # should return task groups for each time of the day,
@@ -238,29 +231,31 @@ end
 # a task group contains a task with that tag
 #
 # TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
-importance_sorted_task_groups = task_importance_sorted_time_groups.inject([]) do |sorted_time_groups, time_group|
-  sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
+def importance_sorted_task_groups
+  task_importance_sorted_time_groups.inject([]) do |sorted_time_groups, time_group|
+    sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
 
-    new_sorting = sorted_task_groups
-    # task_groups:
-    # [[task, task], [task]]
-    sorted_task_groups.each_with_index do |task_group, index|
+      new_sorting = sorted_task_groups
+      # task_groups:
+      # [[task, task], [task]]
+      sorted_task_groups.each_with_index do |task_group, index|
 
-      # task_group:
-      # [task, task]
-      all_tags_in_group = task_group.map {|task| task.tags}.flatten
+        # task_group:
+        # [task, task]
+        all_tags_in_group = task_group.map {|task| task.tags}.flatten
 
-      # move those with tag to front on each operation, otherwise leave where they are
-      if contains_specified_tags?(all_tags_in_group, [tag_name])
-        new_sorting.delete_at(index)
-        new_sorting.unshift task_group
+        # move those with tag to front on each operation, otherwise leave where they are
+        if contains_specified_tags?(all_tags_in_group, [tag_name])
+          new_sorting.delete_at(index)
+          new_sorting.unshift task_group
+        end
       end
+
+      new_sorting
     end
 
-    new_sorting
+    sorted_time_groups << sorted_time_group
   end
-
-  sorted_time_groups << sorted_time_group
 end
 
 # importance_sorted_task_groups.each do |time_group|
@@ -272,6 +267,7 @@ end
 #     task_group.each do |task|
 #       puts task.title
 #       puts '---'
+#       puts "\n\n\n"
 #       puts task.tags.map {|tag| tag.title}.join(',')
 #     end
 #   end
@@ -285,38 +281,42 @@ end
 #   puts task.tags.map {|tag| tag.title}.join(',')
 # end
 
-tasks = sorted3_order(importance_sorted_task_groups.flatten)
 
-todays_tasks = []
-combined_duration = 0
+def todays_tasks_as_json(tasks)
+  todays_tasks = []
+  combined_duration = 0
 
-tasks.each do |task|
-  duration = duration_in_minutes(task.tags)
+  tasks.each do |task|
+    duration = duration_in_minutes(task.tags)
 
-  task = {
-    things_url: things_url(task[:uuid]),
-    content: task_content(task),
-    duration: duration
-  }
+    task = {
+      things_url: things_url(task[:uuid]),
+      content: task_content(task),
+      duration: duration
+    }
 
-  todays_tasks << JSON.generate(task)
+    todays_tasks << JSON.generate(task)
 
-  break if combined_duration >= MAX_MINUTES
-  combined_duration += duration.to_i
+    break if combined_duration >= MAX_MINUTES
+    combined_duration += duration.to_i
+  end
 end
 
-
-client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
 def gist_content
-  todays_tasks.join(',')
+  tasks = sorted3_order(importance_sorted_task_groups.flatten)
+  todays_tasks_as_json(tasks).join(',')
 end
 
-# client.edit_gist(GIST_ID, {
-  # files: {"todays_tasks.json" => {content: "[#{output}]"}}
-# })
+def push_to_gist
+  client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
-if $0 == __FILE__
-  raise ArgumentError, "Usage: #{$0} xh ym" unless ARGV.length > 0
-  puts output(ARGV.join(' '))
+  client.edit_gist(GIST_ID, {
+    files: {"todays_tasks.json" => {content: "[#{output}]"}}
+  })
 end
+
+# if $0 == __FILE__
+#   raise ArgumentError, "Usage: #{$0} xh ym" unless ARGV.length > 0
+#   puts output(ARGV.join(' '))
+# end
