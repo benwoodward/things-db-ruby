@@ -63,13 +63,16 @@ def contains_specified_tags?(tags, tag_names)
 end
 
 def group_by_time_of_day(tasks)
+  first_things = []
   morning_tasks = []
   afternoon_tasks = []
   evening_tasks = []
   anytime = []
 
   tasks.each do |task|
-    if contains_specified_tags?(task.tags, ['when:morning'])
+    if contains_specified_tags?(task.tags, ['when:first-thing'])
+      first_things << task
+    elsif contains_specified_tags?(task.tags, ['when:morning'])
       morning_tasks << task
     elsif contains_specified_tags?(task.tags, ['when:afternoon'])
       afternoon_tasks << task
@@ -80,7 +83,7 @@ def group_by_time_of_day(tasks)
     end
   end
 
-  [morning_tasks, afternoon_tasks, evening_tasks, anytime]
+  [first_things, morning_tasks, anytime, afternoon_tasks, evening_tasks]
 end
 
 def group_by_task_type(tasks)
@@ -164,6 +167,8 @@ def sorted3_order(tasks)
   first_item + reversed_list
 end
 
+tasks = group_by_task_type(tasks).flatten
+
 # Urgent happens first thing
 # Then group tasks together by time of day
 # Then group tasks by type within those groups
@@ -176,13 +181,14 @@ end
 # Then order groups manually
 
 # Then group tasks together by time of day
-morning, afternoon, evening, anytime = group_by_time_of_day(tasks)
+first_things, morning, afternoon, evening, anytime = group_by_time_of_day(tasks)
 
 # {
 #   key: [[], []],
 #   key: [[], []]
 # }
 time_groups = [
+  group_by_task_type(first_things),
   group_by_task_type(morning),
   group_by_task_type(afternoon),
   group_by_task_type(evening),
@@ -190,18 +196,18 @@ time_groups = [
 ]
 
 
-time_groups.each do |time_group|
-  puts "\n::::TIME GROUP::::"
-  puts "======="
-  time_group.each do |task_group|
-    puts "\n::::task group::::"
-    puts "======="
-    task_group.each do |task|
-      puts task.title
-    end
-  end
-  puts "\n\n"
-end
+# time_groups.each do |time_group|
+#   puts "\n::::TIME GROUP::::"
+#   puts "======="
+#   time_group.each do |task_group|
+#     puts "\n::::task group::::"
+#     puts "======="
+#     task_group.each do |task|
+#       puts task.title
+#     end
+#   end
+#   puts "\n\n"
+# end
 
 def sort_task_group(task_group)
   ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(task_group) do |reordered_tasks, tag_name|
@@ -268,21 +274,24 @@ importance_sorted_task_groups.each do |time_group|
     puts "======="
     task_group.each do |task|
       puts task.title
+      puts '---'
+      puts task.tags.map {|tag| tag.title}.join(',')
     end
   end
   puts "\n\n"
 end
 
-tasks = sorted3_order(importance_sorted_task_groups)
+# importance_sorted_task_groups.each do |task|
+#   puts "\n\n===Task==="
+#   puts task.title
+#   puts '----'
+#   puts task.tags.map {|tag| tag.title}.join(',')
+# end
+
+tasks = sorted3_order(importance_sorted_task_groups.flatten)
 
 todays_tasks = []
 combined_duration = 0
-
-tasks = Task.eager(:tags)
-  .where(trashed: 0, status: 0, type: 0, start: 1)
-  .where(Sequel.~(startdate: nil))
-  .order(:todayIndex)
-  .limit(2)
 
 tasks.each do |task|
   duration = duration_in_minutes(task.tags)
@@ -304,11 +313,6 @@ client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
 output = todays_tasks.join(',')
 
-# tasks.each do |task|
-#   puts "===Task==="
-#   puts task.title
-#   puts task.tags.map {|tag| tag.title}.join(',')
-# end
 
 # client.edit_gist(GIST_ID, {
   # files: {"todays_tasks.json" => {content: "[#{output}]"}}
