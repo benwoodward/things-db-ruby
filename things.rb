@@ -222,8 +222,8 @@ end
 # a task group contains a task with that tag
 #
 # TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
-def importance_sorted_task_groups(tasks)
-  tasks.inject([]) do |sorted_time_groups, time_group|
+def importance_sorted_task_groups(time_groups)
+  time_groups.inject([]) do |sorted_time_groups, time_group|
     sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
 
       new_sorting = sorted_task_groups
@@ -297,11 +297,10 @@ end
 
 
 def gist_content
-  tasks = db_tasks
-  tasks = group_by_task_type(tasks).flatten
-  tasks = time_groups(tasks)
-  tasks = task_importance_sorted_time_groups(tasks)
-  tasks = importance_sorted_task_groups(tasks)
+  grouped_tasks = group_by_task_type(db_tasks).flatten
+  time_groups = time_groups(grouped_tasks)
+  sorted_time_groups = task_importance_sorted_time_groups(time_groups)
+  tasks = importance_sorted_task_groups(sorted_time_groups)
 
   tasks.each do |time_group|
     puts "\n::::IMP. Sorted TIME GROUP::::"
@@ -328,13 +327,13 @@ def push_to_gist
   client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
   client.edit_gist(GIST_ID, {
-    files: {"todays_tasks.json" => {content: "[#{output}]"}}
+    files: {"todays_tasks.json" => {content: "[#{gist_content}]"}}
   })
 end
 
-gist_content
+push_to_gist
 
 # if $0 == __FILE__
 #   raise ArgumentError, "Usage: #{$0} xh ym" unless ARGV.length > 0
-#   puts output(ARGV.join(' '))
+#   puts gist_content(ARGV.join(' '))
 # end
