@@ -315,22 +315,31 @@ def print_task_list(tasks)
   end
 end
 
-def gist_content
+def tasks_to_json(tasks)
+  json = todays_tasks_as_json(tasks).join(',')
+  "[#{json}]"
+end
+
+def arranged_tasks
   grouped_tasks = group_by_task_type(db_tasks).flatten
   time_groups = time_groups(grouped_tasks)
   sorted_time_groups = task_importance_sorted_time_groups(time_groups)
   tasks = importance_sorted_task_groups(sorted_time_groups)
   print_task_list(tasks)
-  tasks = tasks.flatten
+  tasks.flatten
+end
+
+def gist_content
+  tasks = arranged_tasks
   tasks = sorted3_order(tasks)
-  todays_tasks_as_json(tasks).join(',')
+  tasks_to_json(tasks)
 end
 
 def push_to_gist
   client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
 
   client.edit_gist(GIST_ID, {
-    files: {"todays_tasks.json" => {content: "[#{gist_content}]"}}
+    files: {"todays_tasks.json" => {content: gist_content}}
   })
 end
 
