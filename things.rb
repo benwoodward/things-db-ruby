@@ -295,12 +295,8 @@ def todays_tasks_as_json(tasks)
   todays_tasks
 end
 
-
-def gist_content
-  grouped_tasks = group_by_task_type(db_tasks).flatten
-  time_groups = time_groups(grouped_tasks)
-  sorted_time_groups = task_importance_sorted_time_groups(time_groups)
-  tasks = importance_sorted_task_groups(sorted_time_groups)
+def print_task_list(tasks)
+  return if ENV['SCRIPT_ENV'] == 'test'
 
   tasks.each do |time_group|
     puts "\n::::IMP. Sorted TIME GROUP::::"
@@ -317,7 +313,14 @@ def gist_content
     end
     puts "\n\n"
   end
+end
 
+def gist_content
+  grouped_tasks = group_by_task_type(db_tasks).flatten
+  time_groups = time_groups(grouped_tasks)
+  sorted_time_groups = task_importance_sorted_time_groups(time_groups)
+  tasks = importance_sorted_task_groups(sorted_time_groups)
+  print_task_list(tasks)
   tasks = tasks.flatten
   tasks = sorted3_order(tasks)
   todays_tasks_as_json(tasks).join(',')
