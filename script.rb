@@ -182,7 +182,7 @@ end
 # end
 
 def sort_task_group(task_group)
-  ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(task_group) do |reordered_tasks, tag_name|
+  ["urg:low", "urg:medium", "urg:high", "urg:extreme"].inject(task_group) do |reordered_tasks, tag_name|
     reordered_tasks.partition do |task|
       contains_specified_tags?(task.tags, [tag_name])
     end.flatten
