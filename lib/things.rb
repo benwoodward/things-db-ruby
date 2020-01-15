@@ -6,10 +6,7 @@ require 'pry'
 require 'octokit'
 require 'json'
 
-require './config'
-require './models/tag'
-require './models/task'
-require './script'
+require 'sorter'
 
-push_to_gist
+Sorter.push_to_gist
 
