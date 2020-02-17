@@ -141,8 +141,6 @@ describe Sorter do
         first_thing_chore_task1,
       ])
 
-
-      puts grouped_tasks.inspect
       expect(grouped_tasks[0][0][0].title).to eq('first_thing_chore_task1').or eq('first_thing_chore_task2')
       expect(grouped_tasks[0][0][1].title).to eq('first_thing_chore_task2').or eq('first_thing_chore_task1')
       expect(grouped_tasks[0][1][0].title).to eq('first_thing_research_task1').or eq('first_thing_research_task2')
@@ -155,6 +153,32 @@ describe Sorter do
   end
 
   describe '#task_importance_sorted_time_groups' do
+  end
+
+  describe '#sort_task_group' do
+    it 'sorts a group of tasks by urgency' do
+      low_urgency_tag     = double(title: 'urg:low')
+      medium_urgency_tag  = double(title: 'urg:medium')
+      high_urgency_tag    = double(title: 'urg:high')
+      extreme_urgency_tag = double(title: 'urg:extreme')
+
+      low_urgency_task     = double(title: 'low_urgency_task',     tags: [low_urgency_tag])
+      medium_urgency_task  = double(title: 'medium_urgency_task',  tags: [medium_urgency_tag])
+      high_urgency_task    = double(title: 'high_urgency_task',    tags: [high_urgency_tag])
+      extreme_urgency_task = double(title: 'extreme_urgency_task', tags: [extreme_urgency_tag])
+
+      sorted_tasks = described_class.sort_task_group([
+        high_urgency_task,
+        low_urgency_task,
+        extreme_urgency_task,
+        medium_urgency_task,
+      ])
+
+      expect(sorted_tasks[0].title).to eq('extreme_urgency_task')
+      expect(sorted_tasks[1].title).to eq('high_urgency_task')
+      expect(sorted_tasks[2].title).to eq('medium_urgency_task')
+      expect(sorted_tasks[3].title).to eq('low_urgency_task')
+    end
   end
 
   describe '#importance_sorted_task_groups' do
