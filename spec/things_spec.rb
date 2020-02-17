@@ -95,6 +95,63 @@ describe Sorter do
   end
 
   describe '#time_groups' do
+    it 'groups by time of day, then subgroups by task type' do
+      # when: tags
+      first_thing_tag = double(title: 'when:first-thing')
+      morning_tag = double(title: 'when:morning')
+      afternoon_tag = double(title: 'when:afternoon')
+      evening_tag = double(title: 'when:evening')
+      anytime_tag = double(title: 'ojefoijvljfjk')
+
+      # what: tags
+      chore_tag = double(title: 'what:chore')
+      errand_tag = double(title: 'what:errand')
+      shopping_list_tag = double(title: 'what:shopping-trip')
+      appointment_tag = double(title: 'what:appointment')
+      phonecall_tag = double(title: 'what:phonecall')
+      email_tag = double(title: 'what:email')
+      message_tag = double(title: 'what:message')
+      focussed_work_tag = double(title: 'what:focussed-work')
+      code_tag = double(title: 'what:code')
+      research_tag = double(title: 'what:research')
+      downtime_tag = double(title: 'what:downtime')
+      to_watch_tag = double(title: 'what:to-watch')
+      to_read_tag = double(title: 'what:to-read')
+
+      # what:research tasks
+      first_thing_research_task1 = double(title: 'first_thing_research_task1', tags: [first_thing_tag, research_tag])
+      first_thing_research_task2 = double(title: 'first_thing_research_task2', tags: [first_thing_tag, research_tag])
+      evening_research_task1 = double(title: 'evening_research_task1', tags: [evening_tag, research_tag])
+      evening_research_task2 = double(title: 'evening_research_task2', tags: [evening_tag, research_tag])
+
+      # what:chore tasks
+      first_thing_chore_task1 = double(title: 'first_thing_chore_task1', tags: [first_thing_tag, chore_tag])
+      first_thing_chore_task2 = double(title: 'first_thing_chore_task2', tags: [first_thing_tag, chore_tag])
+      evening_chore_task1 = double(title: 'evening_chore_task1', tags: [evening_tag, chore_tag])
+      evening_chore_task2 = double(title: 'evening_chore_task2', tags: [evening_tag, chore_tag])
+
+      grouped_tasks = described_class.time_groups([
+        evening_research_task1,
+        first_thing_research_task2,
+        evening_research_task2,
+        evening_chore_task2,
+        first_thing_chore_task2,
+        evening_chore_task1,
+        first_thing_research_task1,
+        first_thing_chore_task1,
+      ])
+
+
+      puts grouped_tasks.inspect
+      expect(grouped_tasks[0][0][0].title).to eq('first_thing_chore_task1').or eq('first_thing_chore_task2')
+      expect(grouped_tasks[0][0][1].title).to eq('first_thing_chore_task2').or eq('first_thing_chore_task1')
+      expect(grouped_tasks[0][1][0].title).to eq('first_thing_research_task1').or eq('first_thing_research_task2')
+      expect(grouped_tasks[0][1][1].title).to eq('first_thing_research_task2').or eq('first_thing_research_task1')
+      expect(grouped_tasks[-1][0][0].title).to eq('evening_chore_task1').or eq('evening_chore_task2')
+      expect(grouped_tasks[-1][0][1].title).to eq('evening_chore_task2').or eq('evening_chore_task1')
+      expect(grouped_tasks[-1][1][0].title).to eq('evening_research_task1').or eq('evening_research_task2')
+      expect(grouped_tasks[-1][1][1].title).to eq('evening_research_task2').or eq('evening_research_task1')
+    end
   end
 
   describe '#task_importance_sorted_time_groups' do
