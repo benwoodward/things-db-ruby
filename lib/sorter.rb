@@ -249,30 +249,6 @@ class Sorter
       end
     end
 
-    # importance_sorted_task_groups.each do |time_group|
-    #   puts "\n::::IMP. Sorted TIME GROUP::::"
-    #   puts "======="
-    #   time_group.each do |task_group|
-    #     puts "\n::::task group::::"
-    #     puts "======="
-    #     task_group.each do |task|
-    #       puts task.title
-    #       puts '---'
-    #       puts task.tags.map {|tag| tag.title}.join(',')
-    #       puts "\n\n\n"
-    #     end
-    #   end
-    #   puts "\n\n"
-    # end
-
-    # importance_sorted_task_groups.each do |task|
-    #   puts "\n\n===Task==="
-    #   puts task.title
-    #   puts '----'
-    #   puts task.tags.map {|tag| tag.title}.join(',')
-    # end
-
-
     def todays_tasks_as_json(tasks)
       todays_tasks = []
       combined_duration = 0
