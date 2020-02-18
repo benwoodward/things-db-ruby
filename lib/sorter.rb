@@ -157,7 +157,7 @@ class Sorter
     end
 
     def sort_task_group(task_group)
-      ["urg:low", "urg:medium", "urg:high", "urg:extreme"].inject(task_group) do |reordered_tasks, tag_name|
+      ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(task_group) do |reordered_tasks, tag_name|
         reordered_tasks.partition do |task|
           contains_specified_tags?(task.tags, [tag_name])
         end.flatten
@@ -189,7 +189,7 @@ class Sorter
     # TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
     def importance_sorted_task_groups(time_groups)
       time_groups.inject([]) do |sorted_time_groups, time_group|
-        sorted_time_group = ["imp:low", "imp:medium", "imp:high", "imp:urgent"].inject(time_group) do |sorted_task_groups, tag_name|
+        sorted_time_group = ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |sorted_task_groups, tag_name|
 
           new_sorting = sorted_task_groups
           # task_groups:
