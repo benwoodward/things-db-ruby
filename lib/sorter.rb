@@ -1,6 +1,6 @@
 require 'config'
-require 'relations/tag'
-require 'relations/task'
+require 'models/tag'
+require 'models/task'
 
 class Sorter
   class << self
