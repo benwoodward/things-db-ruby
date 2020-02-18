@@ -199,8 +199,8 @@ class Sorter
       end
     end
 
-    def task_importance_sorted_time_groups(time_groups)
-      time_groups.inject([]) do |updated_time_groups, time_group|
+    def task_importance_sorted_time_groups(time_groupings)
+      time_groupings.inject([]) do |updated_time_groups, time_group|
         updated_time_group = []
         time_group.each do |task_group|
           sorted_task_group = sort_task_group(task_group)
