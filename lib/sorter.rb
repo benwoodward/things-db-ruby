@@ -4,14 +4,6 @@ require 'relations/task'
 
 class Sorter
   class << self
-    def push_to_gist
-      client = Octokit::Client.new(:access_token => GITHUB_THINGS_TOKEN)
-
-      client.edit_gist(GIST_ID, {
-        files: {"todays_tasks.json" => {content: gist_content}}
-      })
-    end
-
     def duration_in_minutes(tags)
       dur_tag = tags.select {|tag| tag.title =~ /dur:/}.first
       if dur_tag.nil?
@@ -45,8 +37,6 @@ class Sorter
     def things_url(id)
       "things:///show?id=#{id}"
     end
-
-
 
     def contains_specified_tags?(tags, tag_names)
       return false if tags.nil?
@@ -141,23 +131,12 @@ class Sorter
       result.flatten
     end
 
-    def task_content(task)
-      newline_char = "\n"
-      "#{task[:title]}#{newline_char}#{things_url(task[:uuid])}#{newline_char}#{task[:notes]}"
-    end
-
     def db_tasks
       Task.eager(:tags)
         .where(trashed: 0, status: 0, type: 0, start: 1)
         .where(Sequel.~(startdate: nil))
         .order(:todayIndex)
         .limit(100)
-    end
-
-    def sorted3_order(tasks)
-      first_item = [tasks[0]]
-      reversed_list = tasks.drop(1).reverse
-      first_item + reversed_list
     end
 
     # {
@@ -176,20 +155,6 @@ class Sorter
         group_by_task_type(anytime)
       ]
     end
-
-
-    # time_groups.each do |time_group|
-    #   puts "\n::::TIME GROUP::::"
-    #   puts "======="
-    #   time_group.each do |task_group|
-    #     puts "\n::::task group::::"
-    #     puts "======="
-    #     task_group.each do |task|
-    #       puts task.title
-    #     end
-    #   end
-    #   puts "\n\n"
-    # end
 
     def sort_task_group(task_group)
       ["urg:low", "urg:medium", "urg:high", "urg:extreme"].inject(task_group) do |reordered_tasks, tag_name|
@@ -210,7 +175,7 @@ class Sorter
       end
     end
 
-    # should return task groups for each time of the day,
+    # should return time groups for each time of the day,
     # but arranged so that the most important task groups
     # come first
 
@@ -291,11 +256,6 @@ class Sorter
       end
     end
 
-    def tasks_to_json(tasks)
-      json = todays_tasks_as_json(tasks).join(',')
-      "[#{json}]"
-    end
-
     def arranged_tasks
       grouped_tasks = group_by_task_type(db_tasks).flatten
       time_groups = time_groups(grouped_tasks)
@@ -303,12 +263,6 @@ class Sorter
       tasks = importance_sorted_task_groups(sorted_time_groups)
       print_task_list(tasks)
       tasks.flatten
-    end
-
-    def gist_content
-      tasks = arranged_tasks
-      tasks = sorted3_order(tasks)
-      tasks_to_json(tasks)
     end
   end
 end
