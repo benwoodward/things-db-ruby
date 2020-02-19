@@ -202,19 +202,18 @@ class Sorter
       # task_groups:
       # [[task, task], [task]]
       task_groups.each_with_index do |task_group, index|
-
-        # task_group:
-        # [task, task]
-        all_tags_in_group = task_group.map {|task| task.tags}.flatten
-
-        # move those with tag to front on each operation, otherwise leave where they are
-        if contains_specified_tags?(all_tags_in_group, [tag_name])
+        if task_group_contains_tag?(task_group, tag_name)
           new_sorting.delete_at(index)
           new_sorting.unshift task_group
         end
       end
 
       new_sorting
+    end
+
+    def task_group_contains_tag?(task_group, tag_name)
+      all_tags_in_group = task_group.map {|task| task.tags}.flatten
+      contains_specified_tags?(all_tags_in_group, [tag_name])
     end
 
     def todays_tasks_as_json(tasks)
