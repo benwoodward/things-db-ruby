@@ -212,8 +212,11 @@ class Sorter
     end
 
     def task_group_contains_tag?(task_group, tag_name)
-      all_tags_in_group = task_group.map {|task| task.tags}.flatten
-      contains_specified_tags?(all_tags_in_group, [tag_name])
+      contains_specified_tags?(all_tags_in_group(task_group), [tag_name])
+    end
+
+    def all_tags_in_group(task_group)
+      task_group.map {|task| task.tags}.flatten
     end
 
     def todays_tasks_as_json(tasks)
