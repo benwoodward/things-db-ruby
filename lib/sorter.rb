@@ -1,39 +1,5 @@
 class Sorter
   class << self
-    def duration_in_minutes(tags)
-      dur_tag = tags.select {|tag| tag.title =~ /dur:/}.first
-      if dur_tag.nil?
-        return 15
-      else
-        extract_minutes_from_dur_string(dur_tag.title)
-      end
-    end
-
-    def extract_minutes_from_dur_string(str)
-      if str =~ /m|min/
-        minute_string_to_minutes(str)
-      elsif str =~ /h|hr|hour/
-        hour_string_to_minutes(str)
-      end
-    end
-
-    def extract_number_from_string(str)
-      str.gsub(/[a-zA-Z:]/, '').to_i
-    end
-
-    def minute_string_to_minutes(duration)
-      extract_number_from_string(duration)
-    end
-
-    def hour_string_to_minutes(duration)
-      hours = extract_number_from_string(duration)
-      (hours.to_i * 60).to_i
-    end
-
-    def things_url(id)
-      "things:///show?id=#{id}"
-    end
-
     def contains_specified_tags?(tags, tag_names)
       return false if tags.nil? or tag_names.nil?
       tags.select {|tag| tag_names.include?(tag.title) }.count > 0
@@ -123,13 +89,6 @@ class Sorter
       result.flatten
     end
 
-    def db_tasks
-      Task.eager(:tags)
-        .where(trashed: 0, status: 0, type: 0, start: 1)
-        .where(Sequel.~(startdate: nil))
-        .order(:todayIndex)
-        .limit(100)
-    end
 
     # {
     #   key: [[], []],
@@ -198,30 +157,8 @@ class Sorter
       task_group.map {|task| task.tags}.flatten
     end
 
-    def todays_tasks_as_json(tasks)
-      todays_tasks = []
-      combined_duration = 0
-
-      tasks.each do |task|
-        duration = duration_in_minutes(task.tags)
-
-        task = {
-          things_url: things_url(task[:uuid]),
-          content: task_content(task),
-          duration: duration
-        }
-
-        todays_tasks << JSON.generate(task)
-
-        break if combined_duration >= MAX_MINUTES
-        combined_duration += duration.to_i
-      end
-
-      todays_tasks
-    end
-
     def arranged_tasks
-      grouped_tasks = group_by_task_type(db_tasks).flatten
+      grouped_tasks = group_by_task_type(Queries.todays_tasks).flatten
       time_groups = time_groups(grouped_tasks)
       sorted_time_groups = task_importance_sorted_time_groups(time_groups)
       tasks = urgency_sorted_task_groups(sorted_time_groups)

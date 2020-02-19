@@ -10,4 +10,5 @@ require 'logger'
 require 'sorter'
 require 'models/tag'
 require 'models/task'
-
+require 'formatter'
+require 'queries'
