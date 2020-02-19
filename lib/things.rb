@@ -5,7 +5,9 @@ require 'bundler/setup'
 require 'sequel'
 require 'sqlite3'
 require 'pry'
+require 'config'
+require 'logger'
 require 'sorter'
-
-Sorter.arranged_tasks
+require 'models/tag'
+require 'models/task'
 

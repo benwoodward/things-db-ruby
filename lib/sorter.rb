@@ -1,7 +1,3 @@
-require 'config'
-require 'models/tag'
-require 'models/task'
-
 class Sorter
   class << self
     def duration_in_minutes(tags)
@@ -224,32 +220,12 @@ class Sorter
       todays_tasks
     end
 
-    def print_task_list(tasks)
-      return if ENV['SCRIPT_ENV'] == 'test'
-
-      tasks.each do |time_group|
-        puts "\n::::IMP. Sorted TIME GROUP::::"
-        puts "======="
-        time_group.each do |task_group|
-          puts "\n::::task group::::"
-          puts "======="
-          task_group.each do |task|
-            puts task.title
-            puts '---'
-            puts task.tags.map {|tag| tag.title}.join(',')
-            puts "\n\n\n"
-          end
-        end
-        puts "\n\n"
-      end
-    end
-
     def arranged_tasks
       grouped_tasks = group_by_task_type(db_tasks).flatten
       time_groups = time_groups(grouped_tasks)
       sorted_time_groups = task_importance_sorted_time_groups(time_groups)
       tasks = urgency_sorted_task_groups(sorted_time_groups)
-      print_task_list(tasks)
+      Logger.print_task_list(tasks)
       tasks.flatten
     end
   end

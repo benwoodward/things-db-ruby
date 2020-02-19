@@ -3,7 +3,7 @@ require 'json'
 
 describe Sorter do
   describe '#arranged_tasks' do
-    xit 'should be an array of Task objects' do
+    it 'should be an array of Task objects' do
       tasks = described_class.arranged_tasks
       expect(tasks).to be_an(Array)
       expect(tasks.first).to be_an_instance_of(Task)
