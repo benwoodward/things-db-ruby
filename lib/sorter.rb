@@ -6,27 +6,29 @@ class Sorter
     end
 
     def group_by_time_of_day(tasks)
-      first_things = []
-      morning_tasks = []
-      afternoon_tasks = []
-      evening_tasks = []
-      anytime = []
+      return [] if tasks.nil?
+      groupings = Hash.new { |hash, key| hash[key] = [] }
+      result = []
+
+      tagging_groups = {
+        first_thing: ['when:first-thing'],
+        morning:     ['when:morning'],
+        anytime:     nil,
+        afternoon:   ['when:afternoon'],
+        evening:     ['when:evening']
+      }
 
       tasks.each do |task|
-        if contains_specified_tags?(task.tags, ['when:first-thing'])
-          first_things << task
-        elsif contains_specified_tags?(task.tags, ['when:morning'])
-          morning_tasks << task
-        elsif contains_specified_tags?(task.tags, ['when:afternoon'])
-          afternoon_tasks << task
-        elsif contains_specified_tags?(task.tags, ['when:evening'])
-          evening_tasks << task
-        else
-          anytime << task
+        tagging_groups.each do |category, tags|
+          if !contains_specified_tags?(task.tags, tagging_groups.values.flatten)
+            groupings[:anytime] << task
+          elsif contains_specified_tags?(task.tags, tags)
+            groupings[category] << task
+          end
         end
       end
 
-      [first_things, morning_tasks, anytime, afternoon_tasks, evening_tasks]
+      groupings
     end
 
     def group_by_task_type(tasks)
@@ -95,15 +97,14 @@ class Sorter
     #   key: [[], []]
     # }
     def time_groups(tasks)
-      # group tasks together by time of day
-      first_things, morning, afternoon, evening, anytime = group_by_time_of_day(tasks)
+      groupings = group_by_time_of_day(tasks)
 
-      [
-        group_by_task_type(first_things),
-        group_by_task_type(morning),
-        group_by_task_type(afternoon),
-        group_by_task_type(evening),
-        group_by_task_type(anytime)
+      result = [
+        group_by_task_type(groupings[:first_thing]),
+        group_by_task_type(groupings[:morning]),
+        group_by_task_type(groupings[:anytime]),
+        group_by_task_type(groupings[:afternoon]),
+        group_by_task_type(groupings[:evening])
       ]
     end
 

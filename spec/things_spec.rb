@@ -82,16 +82,16 @@ describe Sorter do
         anytime_task2,
       ])
 
-      expect(grouped_tasks[0][0].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[0][1].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[1][0].title).to eq('morning_task1').or eq('morning_task2')
-      expect(grouped_tasks[1][1].title).to eq('morning_task1').or eq('morning_task2')
-      expect(grouped_tasks[2][0].title).to eq('anytime_task1').or eq('anytime_task2')
-      expect(grouped_tasks[2][1].title).to eq('anytime_task1').or eq('anytime_task2')
-      expect(grouped_tasks[3][0].title).to eq('afternoon_task1').or eq('afternoon_task2')
-      expect(grouped_tasks[3][1].title).to eq('afternoon_task1').or eq('afternoon_task2')
-      expect(grouped_tasks[4][0].title).to eq('evening_task1').or eq('evening_task2')
-      expect(grouped_tasks[4][1].title).to eq('evening_task1').or eq('evening_task2')
+      expect(grouped_tasks[:first_thing][0].title).to eq('first_thing_task1').or eq('first_thing_task2')
+      expect(grouped_tasks[:first_thing][1].title).to eq('first_thing_task1').or eq('first_thing_task2')
+      expect(grouped_tasks[:morning][0].title).to eq('morning_task1').or eq('morning_task2')
+      expect(grouped_tasks[:morning][1].title).to eq('morning_task1').or eq('morning_task2')
+      expect(grouped_tasks[:anytime][0].title).to eq('anytime_task1').or eq('anytime_task2')
+      expect(grouped_tasks[:anytime][1].title).to eq('anytime_task1').or eq('anytime_task2')
+      expect(grouped_tasks[:afternoon][0].title).to eq('afternoon_task1').or eq('afternoon_task2')
+      expect(grouped_tasks[:afternoon][1].title).to eq('afternoon_task1').or eq('afternoon_task2')
+      expect(grouped_tasks[:evening][0].title).to eq('evening_task1').or eq('evening_task2')
+      expect(grouped_tasks[:evening][1].title).to eq('evening_task1').or eq('evening_task2')
     end
   end
 
@@ -141,6 +141,15 @@ describe Sorter do
         first_thing_research_task1,
         first_thing_chore_task1,
       ])
+
+      # grouped_tasks.each do |group|
+      #   puts 'group'.upcase
+      #   group.each do |nested_group|
+      #     nested_group.each do |task|
+      #       puts task.inspect
+      #     end
+      #   end
+      # end
 
       expect(grouped_tasks[0][0][0].title).to eq('first_thing_chore_task1').or eq('first_thing_chore_task2')
       expect(grouped_tasks[0][0][1].title).to eq('first_thing_chore_task2').or eq('first_thing_chore_task1')
