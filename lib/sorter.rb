@@ -175,25 +175,15 @@ class Sorter
       end
     end
 
-    # should return time groups for each time of the day,
-    # but arranged so that the most important task groups
-    # come first
-
-    # time_groups:
-    # {
-    #   [[task, task], [task]]
-    # }
-    # for each time_group, order the task_groups by each imp: tag, based on whether
-    # a task group contains a task with that tag
-    #
-    # TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
-    def importance_sorted_task_groups(time_groups)
+    def urgency_sorted_task_groups(time_groups)
       time_groups.inject([]) do |sorted_time_groups, time_group|
-        sorted_time_group = ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |task_groups, tag_name|
-          sort_task_groups_by_group_contains_tag(task_groups, tag_name)
-        end
+        sorted_time_groups << sort_time_group_by_contains_urgency_tag(time_group)
+      end
+    end
 
-        sorted_time_groups << sorted_time_group
+    def sort_time_group_by_contains_urgency_tag(time_group)
+      ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |task_groups, tag_name|
+        sort_task_groups_by_group_contains_tag(task_groups, tag_name)
       end
     end
 
@@ -262,7 +252,7 @@ class Sorter
       grouped_tasks = group_by_task_type(db_tasks).flatten
       time_groups = time_groups(grouped_tasks)
       sorted_time_groups = task_importance_sorted_time_groups(time_groups)
-      tasks = importance_sorted_task_groups(sorted_time_groups)
+      tasks = urgency_sorted_task_groups(sorted_time_groups)
       print_task_list(tasks)
       tasks.flatten
     end

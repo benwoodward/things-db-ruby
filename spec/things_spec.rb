@@ -275,7 +275,7 @@ describe Sorter do
     end
   end
 
-  describe '#importance_sorted_task_groups' do
+  describe '#urgency_sorted_task_groups' do
     it 'ranks and sorts (nested) groups of tasks based on their highest rated task for a given group' do
       # TAGS
       # -----
@@ -317,7 +317,7 @@ describe Sorter do
       high_urgency_downtime    = double(title: 'high_urg, downtime', tags: [high_urgency_tag, downtime_tag])
       asap_urgency_downtime = double(title: 'asap_urg, downtime',  tags: [asap_urgency_tag, downtime_tag])
 
-      sorted_time_groups = described_class.importance_sorted_task_groups(
+      sorted_time_groups = described_class.urgency_sorted_task_groups(
         [
           # a time group, e.g. first thing
           [
