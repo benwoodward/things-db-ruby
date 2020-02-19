@@ -190,25 +190,22 @@ class Sorter
     def importance_sorted_task_groups(time_groups)
       time_groups.inject([]) do |sorted_time_groups, time_group|
         sorted_time_group = ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |task_groups, tag_name|
-          sort_task_groups_by_most_urgent_group(task_groups, tag_name)
+          sort_task_groups_by_group_contains_tag(task_groups, tag_name)
         end
 
         sorted_time_groups << sorted_time_group
       end
     end
 
-    def sort_task_groups_by_most_urgent_group(task_groups, tag_name)
-      new_sorting = task_groups
-      # task_groups:
-      # [[task, task], [task]]
+    def sort_task_groups_by_group_contains_tag(task_groups, tag_name)
       task_groups.each_with_index do |task_group, index|
         if task_group_contains_tag?(task_group, tag_name)
-          new_sorting.delete_at(index)
-          new_sorting.unshift task_group
+          task_groups.delete_at(index)
+          task_groups.unshift task_group
         end
       end
 
-      new_sorting
+      task_groups
     end
 
     def task_group_contains_tag?(task_group, tag_name)
