@@ -189,29 +189,32 @@ class Sorter
     # TODO: Make this less of a headfuck to read; refactor into small sensibly-named methods
     def importance_sorted_task_groups(time_groups)
       time_groups.inject([]) do |sorted_time_groups, time_group|
-        sorted_time_group = ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |sorted_task_groups, tag_name|
-
-          new_sorting = sorted_task_groups
-          # task_groups:
-          # [[task, task], [task]]
-          sorted_task_groups.each_with_index do |task_group, index|
-
-            # task_group:
-            # [task, task]
-            all_tags_in_group = task_group.map {|task| task.tags}.flatten
-
-            # move those with tag to front on each operation, otherwise leave where they are
-            if contains_specified_tags?(all_tags_in_group, [tag_name])
-              new_sorting.delete_at(index)
-              new_sorting.unshift task_group
-            end
-          end
-
-          new_sorting
+        sorted_time_group = ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |task_groups, tag_name|
+          sort_task_groups_by_most_urgent_group(task_groups, tag_name)
         end
 
         sorted_time_groups << sorted_time_group
       end
+    end
+
+    def sort_task_groups_by_most_urgent_group(task_groups, tag_name)
+      new_sorting = task_groups
+      # task_groups:
+      # [[task, task], [task]]
+      task_groups.each_with_index do |task_group, index|
+
+        # task_group:
+        # [task, task]
+        all_tags_in_group = task_group.map {|task| task.tags}.flatten
+
+        # move those with tag to front on each operation, otherwise leave where they are
+        if contains_specified_tags?(all_tags_in_group, [tag_name])
+          new_sorting.delete_at(index)
+          new_sorting.unshift task_group
+        end
+      end
+
+      new_sorting
     end
 
     def todays_tasks_as_json(tasks)
