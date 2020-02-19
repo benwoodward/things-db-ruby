@@ -39,7 +39,7 @@ class Sorter
     end
 
     def contains_specified_tags?(tags, tag_names)
-      return false if tags.nil?
+      return false if tags.nil? or tag_names.nil?
       tags.select {|tag| tag_names.include?(tag.title) }.count > 0
     end
 
@@ -69,36 +69,32 @@ class Sorter
 
     def group_by_task_type(tasks)
       return [] if tasks.nil?
+      groupings = Hash.new { |hash, key| hash[key] = [] }
+      result = []
 
-      errands = []
-      chores = []
-      admin = []
-      focussed_work = []
-      downtime = []
-      other = []
+      tagging_groups = {
+        chores:        ['what:chore'],
+        focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
+        other:         nil,
+        errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
+        admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
+        downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
+      }
 
       tasks.each do |task|
-        if contains_specified_tags?(task.tags, ['what:errand', 'what:shopping-trip', 'what:appointment'])
-          errands << task
-        elsif contains_specified_tags?(task.tags, ['what:chore'])
-          chores << task
-        elsif contains_specified_tags?(task.tags, ['what:admin', 'what:phonecall', 'what:email', 'what:message'])
-          admin << task
-        elsif contains_specified_tags?(task.tags, ['what:focussed-work', 'what:code', 'what:research'])
-          focussed_work << task
-        elsif contains_specified_tags?(task.tags, ['what:downtime', 'what:to-watch', 'what:to-read'])
-          downtime << task
-        else
-          other << task
+        tagging_groups.each do |category, tags|
+          if !contains_specified_tags?(task.tags, tagging_groups.values.flatten)
+            groupings[:other] << task
+          elsif contains_specified_tags?(task.tags, tags)
+            groupings[category] << task
+          end
         end
       end
 
-      admin = group_by_admin_subgroup(admin)
+      groupings[:admin] = group_by_admin_subgroup(groupings[:admin])
 
-      result = []
-
-      [chores, focussed_work, other, errands, admin, downtime].each do |grouping|
-        result << grouping if !grouping.empty?
+      tagging_groups.keys.each do |category|
+        result << groupings[category] if !groupings[category].empty?
       end
 
       result
