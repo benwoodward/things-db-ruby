@@ -39,14 +39,14 @@ describe Sorter do
         errand2
       ])
 
-      expect(grouped_tasks[0][0].title).to eq('chore1')
-      expect(grouped_tasks[0][1].title).to eq('chore2')
-      expect(grouped_tasks[1][0].title).to eq('other')
-      expect(grouped_tasks[2][0].title).to eq('errand1')
-      expect(grouped_tasks[2][1].title).to eq('errand2')
-      expect(grouped_tasks[3][0].title).to eq('message').or eq('email').or eq('phonecall')
-      expect(grouped_tasks[3][1].title).to eq('message').or eq('email').or eq('phonecall')
-      expect(grouped_tasks[3][2].title).to eq('message').or eq('email').or eq('phonecall')
+      expect(grouped_tasks[:chores][0].title).to eq('chore1')
+      expect(grouped_tasks[:chores][1].title).to eq('chore2')
+      expect(grouped_tasks[:other][0].title).to eq('other')
+      expect(grouped_tasks[:errands][0].title).to eq('errand1')
+      expect(grouped_tasks[:errands][1].title).to eq('errand2')
+      expect(grouped_tasks[:admin][0].title).to eq('message').or eq('email').or eq('phonecall')
+      expect(grouped_tasks[:admin][1].title).to eq('message').or eq('email').or eq('phonecall')
+      expect(grouped_tasks[:admin][2].title).to eq('message').or eq('email').or eq('phonecall')
     end
   end
 
@@ -141,15 +141,6 @@ describe Sorter do
         first_thing_research_task1,
         first_thing_chore_task1,
       ])
-
-      # grouped_tasks.each do |group|
-      #   puts 'group'.upcase
-      #   group.each do |nested_group|
-      #     nested_group.each do |task|
-      #       puts task.inspect
-      #     end
-      #   end
-      # end
 
       expect(grouped_tasks[0][0][0].title).to eq('first_thing_chore_task1').or eq('first_thing_chore_task2')
       expect(grouped_tasks[0][0][1].title).to eq('first_thing_chore_task2').or eq('first_thing_chore_task1')

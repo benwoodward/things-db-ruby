@@ -7,8 +7,6 @@ class Sorter
 
     def group_by_time_of_day(tasks)
       return [] if tasks.nil?
-      groupings = Hash.new { |hash, key| hash[key] = [] }
-      result = []
 
       tagging_groups = {
         first_thing: ['when:first-thing'],
@@ -17,6 +15,9 @@ class Sorter
         afternoon:   ['when:afternoon'],
         evening:     ['when:evening']
       }
+
+      groupings = Hash.new
+      tagging_groups.keys.each {|k,_| groupings[k] = []}
 
       tasks.each do |task|
         tagging_groups.each do |category, tags|
@@ -33,8 +34,6 @@ class Sorter
 
     def group_by_task_type(tasks)
       return [] if tasks.nil?
-      groupings = Hash.new { |hash, key| hash[key] = [] }
-      result = []
 
       tagging_groups = {
         chores:        ['what:chore'],
@@ -44,6 +43,9 @@ class Sorter
         admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
         downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
       }
+
+      groupings = Hash.new
+      tagging_groups.keys.each {|k,_| groupings[k] = []}
 
       tasks.each do |task|
         tagging_groups.each do |category, tags|
@@ -55,13 +57,9 @@ class Sorter
         end
       end
 
-      groupings[:admin] = group_by_admin_subgroup(groupings[:admin])
+      # groupings[:admin] = group_by_admin_subgroup(groupings[:admin])
 
-      tagging_groups.keys.each do |category|
-        result << groupings[category] if !groupings[category].empty?
-      end
-
-      result
+      groupings
     end
 
     def group_by_admin_subgroup(tasks)
@@ -100,11 +98,11 @@ class Sorter
       groupings = group_by_time_of_day(tasks)
 
       result = [
-        group_by_task_type(groupings[:first_thing]),
-        group_by_task_type(groupings[:morning]),
-        group_by_task_type(groupings[:anytime]),
-        group_by_task_type(groupings[:afternoon]),
-        group_by_task_type(groupings[:evening])
+        group_by_task_type(groupings[:first_thing]).values,
+        group_by_task_type(groupings[:morning]).values,
+        group_by_task_type(groupings[:anytime]).values,
+        group_by_task_type(groupings[:afternoon]).values,
+        group_by_task_type(groupings[:evening]).values
       ]
     end
 
@@ -159,8 +157,7 @@ class Sorter
     end
 
     def arranged_tasks
-      grouped_tasks = group_by_task_type(Queries.todays_tasks).flatten
-      time_groups = time_groups(grouped_tasks)
+      time_groups = time_groups(Queries.todays_tasks)
       sorted_time_groups = task_importance_sorted_time_groups(time_groups)
       tasks = urgency_sorted_task_groups(sorted_time_groups)
       Logger.print_task_list(tasks)

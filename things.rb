@@ -12,3 +12,5 @@ require 'models/tag'
 require 'models/task'
 require 'formatter'
 require 'queries'
+
+Sorter.arranged_tasks
