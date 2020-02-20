@@ -1,10 +1,5 @@
 class Sorter
   class << self
-    def contains_specified_tags?(tags, tag_names)
-      return false if tags.nil? or tag_names.nil?
-      tags.select {|tag| tag_names.include?(tag.title) }.count > 0
-    end
-
     def group_by_time_of_day(tasks)
       tagging_groups = {
         first_thing: ['when:first-thing'],
@@ -30,11 +25,16 @@ class Sorter
       group_by_tagging_categories(tasks, tagging_groups, :other)
     end
 
+    def initialise_hash_of_arrays_from_keys(keys)
+      h = Hash.new
+      keys.each {|k,_| h[k] = []}
+      h
+    end
+
     def group_by_tagging_categories(tasks, tagging_groups, catch_all_category)
       return [] if tasks.nil?
 
-      groupings = Hash.new
-      tagging_groups.keys.each {|k,_| groupings[k] = []}
+      groupings = initialise_hash_of_arrays_from_keys(tagging_groups.keys)
 
       tasks.each do |task|
         tagging_groups.each do |category, tags|
@@ -135,6 +135,11 @@ class Sorter
       end
 
       task_groups
+    end
+
+    def contains_specified_tags?(tags, tag_names)
+      return false if tags.nil? or tag_names.nil?
+      tags.select {|tag| tag_names.include?(tag.title) }.count > 0
     end
 
     def task_group_contains_tag?(task_group, tag_name)
