@@ -6,8 +6,6 @@ class Sorter
     end
 
     def group_by_time_of_day(tasks)
-      return [] if tasks.nil?
-
       tagging_groups = {
         first_thing: ['when:first-thing'],
         morning:     ['when:morning'],
@@ -16,25 +14,10 @@ class Sorter
         evening:     ['when:evening']
       }
 
-      groupings = Hash.new
-      tagging_groups.keys.each {|k,_| groupings[k] = []}
-
-      tasks.each do |task|
-        tagging_groups.each do |category, tags|
-          if !contains_specified_tags?(task.tags, tagging_groups.values.flatten)
-            groupings[:anytime] << task
-          elsif contains_specified_tags?(task.tags, tags)
-            groupings[category] << task
-          end
-        end
-      end
-
-      groupings
+      group_by_tagging_categories(tasks, tagging_groups, :anytime)
     end
 
     def group_by_task_type(tasks)
-      return [] if tasks.nil?
-
       tagging_groups = {
         chores:        ['what:chore'],
         focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
@@ -44,13 +27,19 @@ class Sorter
         downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
       }
 
+      group_by_tagging_categories(tasks, tagging_groups, :other)
+    end
+
+    def group_by_tagging_categories(tasks, tagging_groups, catch_all_category)
+      return [] if tasks.nil?
+
       groupings = Hash.new
       tagging_groups.keys.each {|k,_| groupings[k] = []}
 
       tasks.each do |task|
         tagging_groups.each do |category, tags|
           if !contains_specified_tags?(task.tags, tagging_groups.values.flatten)
-            groupings[:other] << task
+            groupings[catch_all_category] << task
           elsif contains_specified_tags?(task.tags, tags)
             groupings[category] << task
           end
