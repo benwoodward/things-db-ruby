@@ -9,7 +9,7 @@ class Sorter
         evening:     ['when:evening']
       }
 
-      group_by_tagging_categories(tasks, tagging_groups, :anytime)
+      grouper = Grouper.new(tasks, tagging_groups, :anytime).group_by_tagging_categories
     end
 
     def group_by_task_type(tasks)
@@ -22,33 +22,7 @@ class Sorter
         downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
       }
 
-      group_by_tagging_categories(tasks, tagging_groups, :other)
-    end
-
-    def initialise_hash_of_arrays_from_keys(keys)
-      h = Hash.new
-      keys.each {|k,_| h[k] = []}
-      h
-    end
-
-    def group_by_tagging_categories(tasks, tagging_groups, catch_all_category)
-      return [] if tasks.nil?
-
-      groupings = initialise_hash_of_arrays_from_keys(tagging_groups.keys)
-
-      tasks.each do |task|
-        tagging_groups.each do |category, tags|
-          if !contains_specified_tags?(task.tags, tagging_groups.values.flatten)
-            groupings[catch_all_category] << task
-          elsif contains_specified_tags?(task.tags, tags)
-            groupings[category] << task
-          end
-        end
-      end
-
-      # groupings[:admin] = group_by_admin_subgroup(groupings[:admin])
-
-      groupings
+      grouper = Grouper.new(tasks, tagging_groups, :other).group_by_tagging_categories
     end
 
     def group_by_admin_subgroup(tasks)
