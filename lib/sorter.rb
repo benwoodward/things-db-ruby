@@ -17,12 +17,16 @@ class Sorter
       downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
     }
 
+    def group_tasks(tasks, filter, catch_all:)
+      Grouper.new(tasks, filter, catch_all).group_by_tagging_categories
+    end
+
     def group_by_time_of_day(tasks)
-      grouper = Grouper.new(tasks, TIMES_OF_DAY, :anytime).group_by_tagging_categories
+      group_tasks(tasks, TIMES_OF_DAY, catch_all: :anytime)
     end
 
     def group_by_task_type(tasks)
-      grouper = Grouper.new(tasks, TASK_CATEGORIES, :other).group_by_tagging_categories
+      group_tasks(tasks, TASK_CATEGORIES, catch_all: :other)
     end
 
     def group_by_admin_subgroup(tasks)
