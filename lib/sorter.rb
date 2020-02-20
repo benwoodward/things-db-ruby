@@ -1,7 +1,6 @@
 class Sorter
   class << self
-    def group_by_time_of_day(tasks)
-      tagging_groups = {
+    TIMES_OF_DAY = {
         first_thing: ['when:first-thing'],
         morning:     ['when:morning'],
         anytime:     nil,
@@ -9,20 +8,21 @@ class Sorter
         evening:     ['when:evening']
       }
 
-      grouper = Grouper.new(tasks, tagging_groups, :anytime).group_by_tagging_categories
+    TASK_CATEGORIES = {
+      chores:        ['what:chore'],
+      focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
+      other:         nil,
+      errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
+      admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
+      downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
+    }
+
+    def group_by_time_of_day(tasks)
+      grouper = Grouper.new(tasks, TIMES_OF_DAY, :anytime).group_by_tagging_categories
     end
 
     def group_by_task_type(tasks)
-      tagging_groups = {
-        chores:        ['what:chore'],
-        focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
-        other:         nil,
-        errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
-        admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
-        downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
-      }
-
-      grouper = Grouper.new(tasks, tagging_groups, :other).group_by_tagging_categories
+      grouper = Grouper.new(tasks, TASK_CATEGORIES, :other).group_by_tagging_categories
     end
 
     def group_by_admin_subgroup(tasks)
