@@ -123,26 +123,29 @@ class Sorter
       task_groups
     end
 
+    def task_group_contains_tag?(task_group, tag_name)
+      contains_specified_tags?(collective_tags_for_task_array(task_group), [tag_name])
+    end
+
+    def collective_tags_for_task_array(task_array)
+      task_array.map {|task| task.tags}.flatten.uniq
+    end
+
     def contains_specified_tags?(tags, tag_names)
       return false if tags.nil? or tag_names.nil?
       tags.select {|tag| tag_names.include?(tag.title) }.count > 0
-    end
-
-    def task_group_contains_tag?(task_group, tag_name)
-      contains_specified_tags?(all_tags_in_group(task_group), [tag_name])
-    end
-
-    def all_tags_in_group(task_group)
-      task_group.map {|task| task.tags}.flatten
     end
 
     def todays_tasks
       Queries.todays_tasks
     end
 
+    def todays_tasks_grouped_by_time_of_day
+      time_groups(todays_tasks)
+    end
+
     def arranged_tasks
-      time_groups = time_groups(todays_tasks)
-      sorted_time_groups = urgency_sorted_time_groups(time_groups)
+      sorted_time_groups = urgency_sorted_time_groups(todays_tasks_grouped_by_time_of_day)
       tasks = urgency_sorted_task_groups(sorted_time_groups)
       Logger.print_task_list(tasks)
       tasks.flatten
