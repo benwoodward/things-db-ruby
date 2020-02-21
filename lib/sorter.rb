@@ -66,13 +66,13 @@ class Sorter
     def time_groups(tasks)
       groupings = group_by_time_of_day(tasks)
 
-      result = [
-        group_by_task_type(groupings[:first_thing]).values,
-        group_by_task_type(groupings[:morning]).values,
-        group_by_task_type(groupings[:anytime]).values,
-        group_by_task_type(groupings[:afternoon]).values,
-        group_by_task_type(groupings[:evening]).values
-      ]
+      {
+        first_thing: groupings[:first_thing],
+        morning: groupings[:morning],
+        anytime: groupings[:anytime],
+        afternoon: groupings[:afternoon],
+        evening: groupings[:evening]
+      }
     end
 
 
@@ -147,8 +147,9 @@ class Sorter
     def arranged_tasks
       sorted_time_groups = urgency_sorted_time_groups(todays_tasks_grouped_by_time_of_day)
       tasks = urgency_sorted_task_groups(sorted_time_groups)
+
       Logger.print_task_list(tasks)
       tasks.flatten
     end
   end
-  end
+end
