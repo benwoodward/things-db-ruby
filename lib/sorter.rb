@@ -76,20 +76,18 @@ class Sorter
 
     def task_importance_sorted_time_groups(time_groupings)
       time_groupings.inject([]) do |updated_time_groups, time_group|
-        updated_time_group = process_time_group(time_group)
-        updated_time_groups << updated_time_group
+        process_time_group(time_group, updated_time_groups)
       end
     end
 
-    def process_time_group(time_group)
-      updated_time_group = []
+    def process_time_group(time_group, accumulator)
+      accumulator << sort_nested_task_groups(time_group)
+    end
 
-      time_group.each do |task_group|
-        sorted_task_group = sort_task_group_by_urgency(task_group)
-        updated_time_group << sorted_task_group
+    def sort_nested_task_groups(time_group)
+      time_group.inject([]) do |accumulator, task_group|
+        accumulator << sort_task_group_by_urgency(task_group)
       end
-
-      updated_time_group
     end
 
     def sort_task_group_by_urgency(task_group)
