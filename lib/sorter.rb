@@ -1,3 +1,5 @@
+require 'queries'
+
 class Sorter
   class << self
     TIMES_OF_DAY = {
@@ -74,7 +76,7 @@ class Sorter
     end
 
 
-    def task_importance_sorted_time_groups(time_groupings)
+    def urgency_sorted_time_groups(time_groupings)
       time_groupings.inject([]) do |updated_time_groups, time_group|
         process_time_group(time_group, updated_time_groups)
       end
@@ -134,12 +136,16 @@ class Sorter
       task_group.map {|task| task.tags}.flatten
     end
 
+    def todays_tasks
+      Queries.todays_tasks
+    end
+
     def arranged_tasks
-      time_groups = time_groups(Queries.todays_tasks)
-      sorted_time_groups = task_importance_sorted_time_groups(time_groups)
+      time_groups = time_groups(todays_tasks)
+      sorted_time_groups = urgency_sorted_time_groups(time_groups)
       tasks = urgency_sorted_task_groups(sorted_time_groups)
       Logger.print_task_list(tasks)
       tasks.flatten
     end
   end
-end
+  end

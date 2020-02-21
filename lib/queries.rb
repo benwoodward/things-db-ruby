@@ -1,3 +1,5 @@
+require 'models/task'
+
 class Queries
   class << self
     def todays_tasks
