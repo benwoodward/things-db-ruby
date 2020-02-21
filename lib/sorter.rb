@@ -2,13 +2,15 @@ require 'queries'
 
 class Sorter
   class << self
-    TIMES_OF_DAY = {
+    TIMES_OF_DAY_TAGS = {
         first_thing: ['when:first-thing'],
         morning:     ['when:morning'],
         anytime:     nil,
         afternoon:   ['when:afternoon'],
         evening:     ['when:evening']
       }
+
+    TIMES_OF_DAY = TIMES_OF_DAY_TAGS.keys
 
     TASK_CATEGORIES = {
       chores:        ['what:chore'],
@@ -24,7 +26,7 @@ class Sorter
     end
 
     def group_by_time_of_day(tasks)
-      group_tasks(tasks, TIMES_OF_DAY, catch_all: :anytime)
+      group_tasks(tasks, TIMES_OF_DAY_TAGS, catch_all: :anytime)
     end
 
     def group_by_task_type(tasks)
@@ -63,16 +65,16 @@ class Sorter
     #   key: [[], []],
     #   key: [[], []]
     # }
-    def time_groups(tasks)
+    def create_time_groups_from_tasks(tasks, tags_to_group_by)
       groupings = group_by_time_of_day(tasks)
 
-      {
-        first_thing: groupings[:first_thing],
-        morning: groupings[:morning],
-        anytime: groupings[:anytime],
-        afternoon: groupings[:afternoon],
-        evening: groupings[:evening]
-      }
+      h = Hash.new
+
+      tags_to_group_by.each do |tag|
+        h[tag.to_sym] = groupings[tag.to_sym]
+      end
+
+      h
     end
 
 
@@ -141,7 +143,7 @@ class Sorter
     end
 
     def todays_tasks_grouped_by_time_of_day
-      time_groups(todays_tasks)
+      create_time_groups_from_tasks(todays_tasks, TIMES_OF_DAY)
     end
 
     def arranged_tasks

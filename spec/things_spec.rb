@@ -95,7 +95,7 @@ describe Sorter do
     end
   end
 
-  describe '#time_groups' do
+  describe '#create_time_groups_from_tasks' do
     it 'groups by time of day' do
       # when: tags
       first_thing_tag = double(title: 'when:first-thing')
@@ -110,12 +110,22 @@ describe Sorter do
       evening_task1 = double(title: 'evening_task1', tags: [evening_tag])
       evening_task2 = double(title: 'evening_task2', tags: [evening_tag])
 
-      grouped_tasks = described_class.time_groups([
+      tasks = [
         evening_task1,
         first_thing_task1,
         evening_task2,
         first_thing_task2,
-      ])
+      ]
+
+      tags_to_group_by = [
+        :first_thing,
+        :morning,
+        :anytime,
+        :afternoon,
+        :evening
+      ]
+
+      grouped_tasks = described_class.create_time_groups_from_tasks(tasks, tags_to_group_by)
 
       expect(grouped_tasks[:first_thing][0].title).to eq('first_thing_task1').or eq('first_thing_task2')
       expect(grouped_tasks[:first_thing][1].title).to eq('first_thing_task1').or eq('first_thing_task2')
