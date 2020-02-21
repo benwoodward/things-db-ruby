@@ -1,157 +1,155 @@
 require 'queries'
 
 class Sorter
-  class << self
-    TIMES_OF_DAY_TAGS = {
-        first_thing: ['when:first-thing'],
-        morning:     ['when:morning'],
-        anytime:     nil,
-        afternoon:   ['when:afternoon'],
-        evening:     ['when:evening']
-      }
-
-    TIMES_OF_DAY = TIMES_OF_DAY_TAGS.keys
-
-    TASK_CATEGORIES = {
-      chores:        ['what:chore'],
-      focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
-      other:         nil,
-      errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
-      admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
-      downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
+  TIMES_OF_DAY_TAGS = {
+      first_thing: ['when:first-thing'],
+      morning:     ['when:morning'],
+      anytime:     nil,
+      afternoon:   ['when:afternoon'],
+      evening:     ['when:evening']
     }
 
-    def group_tasks(tasks, filter, catch_all:)
-      Grouper.new(tasks, filter, catch_all).group_by_tagging_categories
-    end
+  TIMES_OF_DAY = TIMES_OF_DAY_TAGS.keys
 
-    def group_by_time_of_day(tasks)
-      group_tasks(tasks, TIMES_OF_DAY_TAGS, catch_all: :anytime)
-    end
+  TASK_CATEGORIES = {
+    chores:        ['what:chore'],
+    focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
+    other:         nil,
+    errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
+    admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
+    downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
+  }
 
-    def group_by_task_type(tasks)
-      group_tasks(tasks, TASK_CATEGORIES, catch_all: :other)
-    end
+  def group_tasks(tasks, filter, catch_all:)
+    Grouper.new(tasks, filter, catch_all).group_by_tagging_categories
+  end
 
-    def group_by_admin_subgroup(tasks)
-      general = []
-      phonecalls = []
-      messages = []
-      emails = []
+  def group_by_time_of_day(tasks)
+    group_tasks(tasks, TIMES_OF_DAY_TAGS, catch_all: :anytime)
+  end
 
-      tasks.each do |task|
-        if contains_specified_tags?(task.tags, ['what:admin'])
-          general << task
-        elsif contains_specified_tags?(task.tags, ['what:phonecall'])
-          phonecalls << task
-        elsif contains_specified_tags?(task.tags, ['what:message'])
-          messages << task
-        elsif contains_specified_tags?(task.tags, ['what:email'])
-          emails << task
-        end
-      end
+  def group_by_task_type(tasks)
+    group_tasks(tasks, TASK_CATEGORIES, catch_all: :other)
+  end
 
-      result = []
+  def group_by_admin_subgroup(tasks)
+    general = []
+    phonecalls = []
+    messages = []
+    emails = []
 
-      [emails, messages, phonecalls, general].each do |grouping|
-        result << grouping if !grouping.empty?
-      end
-
-      result.flatten
-    end
-
-
-    # {
-    #   key: [[], []],
-    #   key: [[], []]
-    # }
-    def create_time_groups_from_tasks(tasks, tags_to_group_by)
-      groupings = group_by_time_of_day(tasks)
-
-      h = Hash.new
-
-      tags_to_group_by.each do |tag|
-        h[tag.to_sym] = groupings[tag.to_sym]
-      end
-
-      h
-    end
-
-
-    def urgency_sorted_time_groups(time_groupings)
-      time_groupings.inject([]) do |updated_time_groups, time_group|
-        process_time_group(time_group, updated_time_groups)
+    tasks.each do |task|
+      if contains_specified_tags?(task.tags, ['what:admin'])
+        general << task
+      elsif contains_specified_tags?(task.tags, ['what:phonecall'])
+        phonecalls << task
+      elsif contains_specified_tags?(task.tags, ['what:message'])
+        messages << task
+      elsif contains_specified_tags?(task.tags, ['what:email'])
+        emails << task
       end
     end
 
-    def process_time_group(time_group, accumulator)
-      accumulator << sort_nested_task_groups(time_group)
+    result = []
+
+    [emails, messages, phonecalls, general].each do |grouping|
+      result << grouping if !grouping.empty?
     end
 
-    def sort_nested_task_groups(time_group)
-      time_group.inject([]) do |accumulator, task_group|
-        accumulator << sort_task_group_by_urgency(task_group)
+    result.flatten
+  end
+
+
+  # {
+  #   key: [[], []],
+  #   key: [[], []]
+  # }
+  def create_time_groups_from_tasks(tasks, tags_to_group_by)
+    groupings = group_by_time_of_day(tasks)
+
+    h = Hash.new
+
+    tags_to_group_by.each do |tag|
+      h[tag.to_sym] = groupings[tag.to_sym]
+    end
+
+    h
+  end
+
+
+  def urgency_sorted_time_groups(time_groupings)
+    time_groupings.inject([]) do |updated_time_groups, time_group|
+      process_time_group(time_group, updated_time_groups)
+    end
+  end
+
+  def process_time_group(time_group, accumulator)
+    accumulator << sort_nested_task_groups(time_group)
+  end
+
+  def sort_nested_task_groups(time_group)
+    time_group.inject([]) do |accumulator, task_group|
+      accumulator << sort_task_group_by_urgency(task_group)
+    end
+  end
+
+  def sort_task_group_by_urgency(task_group)
+    ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(task_group) do |reordered_tasks, tag_name|
+      reordered_tasks.partition do |task|
+        contains_specified_tags?(task.tags, [tag_name])
+      end.flatten
+    end
+  end
+
+  def urgency_sorted_task_groups(time_groups)
+    time_groups.inject([]) do |sorted_time_groups, time_group|
+      sorted_time_groups << sort_time_group_by_contains_urgency_tag(time_group)
+    end
+  end
+
+  def sort_time_group_by_contains_urgency_tag(time_group)
+    ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |task_groups, tag_name|
+      sort_task_groups_by_group_contains_tag(task_groups, tag_name)
+    end
+  end
+
+  def sort_task_groups_by_group_contains_tag(task_groups, tag_name)
+    task_groups.each_with_index do |task_group, index|
+      if task_group_contains_tag?(task_group, tag_name)
+        task_groups.delete_at(index)
+        task_groups.unshift task_group
       end
     end
 
-    def sort_task_group_by_urgency(task_group)
-      ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(task_group) do |reordered_tasks, tag_name|
-        reordered_tasks.partition do |task|
-          contains_specified_tags?(task.tags, [tag_name])
-        end.flatten
-      end
-    end
+    task_groups
+  end
 
-    def urgency_sorted_task_groups(time_groups)
-      time_groups.inject([]) do |sorted_time_groups, time_group|
-        sorted_time_groups << sort_time_group_by_contains_urgency_tag(time_group)
-      end
-    end
+  def task_group_contains_tag?(task_group, tag_name)
+    contains_specified_tags?(collective_tags_for_task_array(task_group), [tag_name])
+  end
 
-    def sort_time_group_by_contains_urgency_tag(time_group)
-      ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(time_group) do |task_groups, tag_name|
-        sort_task_groups_by_group_contains_tag(task_groups, tag_name)
-      end
-    end
+  def collective_tags_for_task_array(task_array)
+    task_array.map {|task| task.tags}.flatten.uniq
+  end
 
-    def sort_task_groups_by_group_contains_tag(task_groups, tag_name)
-      task_groups.each_with_index do |task_group, index|
-        if task_group_contains_tag?(task_group, tag_name)
-          task_groups.delete_at(index)
-          task_groups.unshift task_group
-        end
-      end
+  def contains_specified_tags?(tags, tag_names)
+    return false if tags.nil? or tag_names.nil?
+    tags.select {|tag| tag_names.include?(tag.title) }.count > 0
+  end
 
-      task_groups
-    end
+  def todays_tasks
+    Queries.todays_tasks
+  end
 
-    def task_group_contains_tag?(task_group, tag_name)
-      contains_specified_tags?(collective_tags_for_task_array(task_group), [tag_name])
-    end
+  def todays_tasks_grouped_by_time_of_day
+    create_time_groups_from_tasks(todays_tasks, TIMES_OF_DAY)
+  end
 
-    def collective_tags_for_task_array(task_array)
-      task_array.map {|task| task.tags}.flatten.uniq
-    end
+  def arranged_tasks
+    sorted_time_groups = urgency_sorted_time_groups(todays_tasks_grouped_by_time_of_day)
+    tasks = urgency_sorted_task_groups(sorted_time_groups)
 
-    def contains_specified_tags?(tags, tag_names)
-      return false if tags.nil? or tag_names.nil?
-      tags.select {|tag| tag_names.include?(tag.title) }.count > 0
-    end
-
-    def todays_tasks
-      Queries.todays_tasks
-    end
-
-    def todays_tasks_grouped_by_time_of_day
-      create_time_groups_from_tasks(todays_tasks, TIMES_OF_DAY)
-    end
-
-    def arranged_tasks
-      sorted_time_groups = urgency_sorted_time_groups(todays_tasks_grouped_by_time_of_day)
-      tasks = urgency_sorted_task_groups(sorted_time_groups)
-
-      Logger.print_task_list(tasks)
-      tasks.flatten
-    end
+    Logger.print_task_list(tasks)
+    tasks.flatten
   end
 end
