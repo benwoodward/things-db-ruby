@@ -3,5 +3,23 @@
 $LOAD_PATH.unshift File.expand_path("..", "lib")
 require 'things'
 
+TIMES_OF_DAY_TAGS = {
+  first_thing: ['when:first-thing'],
+  morning:     ['when:morning'],
+  anytime:     nil,
+  afternoon:   ['when:afternoon'],
+  evening:     ['when:evening']
+}
+
+TIMES_OF_DAY = TIMES_OF_DAY_TAGS.keys
+
+TASK_CATEGORIES = {
+  chores:        ['what:chore'],
+  focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
+  other:         nil,
+  errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
+  admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
+  downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
+}
 
 Sorter.arranged_tasks

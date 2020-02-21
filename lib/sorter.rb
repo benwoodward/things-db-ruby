@@ -1,35 +1,22 @@
 require 'queries'
 
 class Sorter
-  TIMES_OF_DAY_TAGS = {
-      first_thing: ['when:first-thing'],
-      morning:     ['when:morning'],
-      anytime:     nil,
-      afternoon:   ['when:afternoon'],
-      evening:     ['when:evening']
-    }
-
-  TIMES_OF_DAY = TIMES_OF_DAY_TAGS.keys
-
-  TASK_CATEGORIES = {
-    chores:        ['what:chore'],
-    focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
-    other:         nil,
-    errands:       ['what:errand', 'what:shopping-trip', 'what:appointment'],
-    admin:         ['what:admin', 'what:phonecall', 'what:email', 'what:message'],
-    downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
-  }
+  def initialize(times_of_day_tags, task_categories)
+    @times_of_day_tags = times_of_day_tags
+    @times_of_day = times_of_day_tags.keys
+    @task_categories = task_categories
+  end
 
   def group_tasks(tasks, filter, catch_all:)
     Grouper.new(tasks, filter, catch_all).group_by_tagging_categories
   end
 
   def group_by_time_of_day(tasks)
-    group_tasks(tasks, TIMES_OF_DAY_TAGS, catch_all: :anytime)
+    group_tasks(tasks, @times_of_day_tags, catch_all: :anytime)
   end
 
   def group_by_task_type(tasks)
-    group_tasks(tasks, TASK_CATEGORIES, catch_all: :other)
+    group_tasks(tasks, @task_categories, catch_all: :other)
   end
 
   def group_by_admin_subgroup(tasks)
@@ -142,7 +129,7 @@ class Sorter
   end
 
   def todays_tasks_grouped_by_time_of_day
-    create_time_groups_from_tasks(todays_tasks, TIMES_OF_DAY)
+    create_time_groups_from_tasks(todays_tasks, @times_of_day)
   end
 
   def arranged_tasks
