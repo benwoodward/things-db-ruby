@@ -261,7 +261,7 @@ describe Sorter do
     end
   end
 
-  describe '#sort_task_group' do
+  describe '#sort_task_group_by_urgency' do
     it 'sorts a group of tasks by urgency' do
       low_urgency_tag     = double(title: 'urg:low')
       medium_urgency_tag  = double(title: 'urg:medium')
@@ -273,7 +273,7 @@ describe Sorter do
       high_urgency_task    = double(title: 'high_urgency_task',    tags: [high_urgency_tag])
       asap_urgency_task = double(title: 'asap_urgency_task', tags: [asap_urgency_tag])
 
-      sorted_tasks = described_class.sort_task_group([
+      sorted_tasks = described_class.sort_task_group_by_urgency([
         high_urgency_task,
         low_urgency_task,
         asap_urgency_task,

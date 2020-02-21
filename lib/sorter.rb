@@ -73,22 +73,30 @@ class Sorter
       ]
     end
 
-    def sort_task_group(task_group)
+
+    def task_importance_sorted_time_groups(time_groupings)
+      time_groupings.inject([]) do |updated_time_groups, time_group|
+        updated_time_group = process_time_group(time_group)
+        updated_time_groups << updated_time_group
+      end
+    end
+
+    def process_time_group(time_group)
+      updated_time_group = []
+
+      time_group.each do |task_group|
+        sorted_task_group = sort_task_group_by_urgency(task_group)
+        updated_time_group << sorted_task_group
+      end
+
+      updated_time_group
+    end
+
+    def sort_task_group_by_urgency(task_group)
       ["urg:low", "urg:medium", "urg:high", "urg:asap"].inject(task_group) do |reordered_tasks, tag_name|
         reordered_tasks.partition do |task|
           contains_specified_tags?(task.tags, [tag_name])
         end.flatten
-      end
-    end
-
-    def task_importance_sorted_time_groups(time_groupings)
-      time_groupings.inject([]) do |updated_time_groups, time_group|
-        updated_time_group = []
-        time_group.each do |task_group|
-          sorted_task_group = sort_task_group(task_group)
-          updated_time_group << sorted_task_group
-        end
-        updated_time_groups << updated_time_group
       end
     end
 
