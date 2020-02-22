@@ -1,22 +1,15 @@
 require 'queries'
 
 class Sorter
-  def initialize(times_of_day_tags, task_categories)
-    @times_of_day_tags = times_of_day_tags
-    @times_of_day = times_of_day_tags.keys
+  def initialize(task_categories)
     @task_categories = task_categories
   end
 
-  def group_tasks(tasks, filter, catch_all:)
-    Grouper.new(tasks, filter, catch_all).group_by_tagging_categories
-  end
-
-  def group_by_time_of_day(tasks)
-    group_tasks(tasks, @times_of_day_tags, catch_all: :anytime)
+  def sort_tasks(tasks)
   end
 
   def group_by_task_type(tasks)
-    group_tasks(tasks, @task_categories, catch_all: :other)
+    Grouper.new(tasks, @task_categories, catch_all: :other).group_by_tagging_categories
   end
 
   def group_by_admin_subgroup(tasks)
@@ -46,22 +39,6 @@ class Sorter
     result.flatten
   end
 
-
-  # {
-  #   key: [[], []],
-  #   key: [[], []]
-  # }
-  def create_time_groups_from_tasks(tasks, tags_to_group_by)
-    groupings = group_by_time_of_day(tasks)
-
-    h = Hash.new
-
-    tags_to_group_by.each do |tag|
-      h[tag.to_sym] = groupings[tag.to_sym]
-    end
-
-    h
-  end
 
 
   def urgency_sorted_time_groups(time_groupings)
@@ -122,21 +99,5 @@ class Sorter
   def contains_specified_tags?(tags, tag_names)
     return false if tags.nil? or tag_names.nil?
     tags.select {|tag| tag_names.include?(tag.title) }.count > 0
-  end
-
-  def todays_tasks
-    Queries.todays_tasks
-  end
-
-  def todays_tasks_grouped_by_time_of_day
-    create_time_groups_from_tasks(todays_tasks, @times_of_day)
-  end
-
-  def arranged_tasks
-    sorted_time_groups = urgency_sorted_time_groups(todays_tasks_grouped_by_time_of_day)
-    tasks = urgency_sorted_task_groups(sorted_time_groups)
-
-    Logger.print_task_list(tasks)
-    tasks.flatten
   end
 end

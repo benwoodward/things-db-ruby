@@ -23,9 +23,9 @@ describe Sorter do
     }
   end
 
-  describe '#arranged_tasks' do
+  describe '#sort' do
     xit 'should be an array of Task objects' do
-      tasks = described_class.new(@times_of_day_tags, @task_categories).arranged_tasks
+      tasks = described_class.new(@times_of_day_tags, @task_categories).sort
       expect(tasks).to be_an(Array)
       expect(tasks.first).to be_an_instance_of(Task)
     end
@@ -49,7 +49,7 @@ describe Sorter do
       email = double(title: 'email', tags: [email_tag])
       other = double(title: 'other', tags: [other_tag])
 
-      grouped_tasks = described_class.new(@times_of_day_tags, @task_categories).group_by_task_type([
+      grouped_tasks = described_class.new(@task_categories).group_by_task_type([
         chore1,
         message,
         errand1,
@@ -68,90 +68,6 @@ describe Sorter do
       expect(grouped_tasks[:admin][0].title).to eq('message').or eq('email').or eq('phonecall')
       expect(grouped_tasks[:admin][1].title).to eq('message').or eq('email').or eq('phonecall')
       expect(grouped_tasks[:admin][2].title).to eq('message').or eq('email').or eq('phonecall')
-    end
-  end
-
-  describe '#group_by_time_of_day' do
-    it 'groups tasks by time of day tags' do
-      first_thing_tag = double(title: 'when:first-thing')
-      morning_tag = double(title: 'when:morning')
-      afternoon_tag = double(title: 'when:afternoon')
-      evening_tag = double(title: 'when:evening')
-      anytime_tag = double(title: 'ojefoijvljfjk')
-
-      first_thing_task1 = double(title: 'first_thing_task1', tags: [first_thing_tag])
-      first_thing_task2 = double(title: 'first_thing_task2', tags: [first_thing_tag])
-      morning_task1 = double(title: 'morning_task1', tags: [morning_tag])
-      morning_task2 = double(title: 'morning_task2', tags: [morning_tag])
-      afternoon_task1 = double(title: 'afternoon_task1', tags: [afternoon_tag])
-      afternoon_task2 = double(title: 'afternoon_task2', tags: [afternoon_tag])
-      evening_task1 = double(title: 'evening_task1', tags: [evening_tag])
-      evening_task2 = double(title: 'evening_task2', tags: [evening_tag])
-      anytime_task1 = double(title: 'anytime_task1', tags: [anytime_tag])
-      anytime_task2 = double(title: 'anytime_task2', tags: [anytime_tag])
-
-      grouped_tasks = described_class.new(@times_of_day_tags, @task_categories).group_by_time_of_day([
-        morning_task1,
-        evening_task1,
-        morning_task2,
-        anytime_task1,
-        first_thing_task1,
-        afternoon_task1,
-        evening_task2,
-        first_thing_task2,
-        afternoon_task2,
-        anytime_task2,
-      ])
-
-      expect(grouped_tasks[:first_thing][0].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[:first_thing][1].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[:morning][0].title).to eq('morning_task1').or eq('morning_task2')
-      expect(grouped_tasks[:morning][1].title).to eq('morning_task1').or eq('morning_task2')
-      expect(grouped_tasks[:anytime][0].title).to eq('anytime_task1').or eq('anytime_task2')
-      expect(grouped_tasks[:anytime][1].title).to eq('anytime_task1').or eq('anytime_task2')
-      expect(grouped_tasks[:afternoon][0].title).to eq('afternoon_task1').or eq('afternoon_task2')
-      expect(grouped_tasks[:afternoon][1].title).to eq('afternoon_task1').or eq('afternoon_task2')
-      expect(grouped_tasks[:evening][0].title).to eq('evening_task1').or eq('evening_task2')
-      expect(grouped_tasks[:evening][1].title).to eq('evening_task1').or eq('evening_task2')
-    end
-  end
-
-  describe '#create_time_groups_from_tasks' do
-    it 'groups by time of day' do
-      # when: tags
-      first_thing_tag = double(title: 'when:first-thing')
-      morning_tag = double(title: 'when:morning')
-      afternoon_tag = double(title: 'when:afternoon')
-      evening_tag = double(title: 'when:evening')
-      anytime_tag = double(title: 'ojefoijvljfjk')
-
-      # tasks
-      first_thing_task1 = double(title: 'first_thing_task1', tags: [first_thing_tag])
-      first_thing_task2 = double(title: 'first_thing_task2', tags: [first_thing_tag])
-      evening_task1 = double(title: 'evening_task1', tags: [evening_tag])
-      evening_task2 = double(title: 'evening_task2', tags: [evening_tag])
-
-      tasks = [
-        evening_task1,
-        first_thing_task1,
-        evening_task2,
-        first_thing_task2,
-      ]
-
-      tags_to_group_by = [
-        :first_thing,
-        :morning,
-        :anytime,
-        :afternoon,
-        :evening
-      ]
-
-      grouped_tasks = described_class.new(@times_of_day_tags, @task_categories).create_time_groups_from_tasks(tasks, tags_to_group_by)
-
-      expect(grouped_tasks[:first_thing][0].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[:first_thing][1].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[:evening][0].title).to eq('evening_task1').or eq('evening_task2')
-      expect(grouped_tasks[:evening][1].title).to eq('evening_task1').or eq('evening_task2')
     end
   end
 
@@ -197,7 +113,7 @@ describe Sorter do
       high_urgency_downtime    = double(title: 'high_urg, downtime', tags: [high_urgency_tag, downtime_tag])
       asap_urgency_downtime = double(title: 'asap_urg, downtime',  tags: [asap_urgency_tag, downtime_tag])
 
-      sorted_time_groups = described_class.new(@times_of_day_tags, @task_categories).urgency_sorted_time_groups(
+      sorted_time_groups = described_class.new(@task_categories).urgency_sorted_time_groups(
         [
           # a time group, e.g. first thing
           [
@@ -275,7 +191,7 @@ describe Sorter do
       high_urgency_task    = double(title: 'high_urgency_task',    tags: [high_urgency_tag])
       asap_urgency_task = double(title: 'asap_urgency_task', tags: [asap_urgency_tag])
 
-      sorted_tasks = described_class.new(@times_of_day_tags, @task_categories).sort_task_group_by_urgency([
+      sorted_tasks = described_class.new(@task_categories).sort_task_group_by_urgency([
         high_urgency_task,
         low_urgency_task,
         asap_urgency_task,
@@ -331,7 +247,7 @@ describe Sorter do
       high_urgency_downtime    = double(title: 'high_urg, downtime', tags: [high_urgency_tag, downtime_tag])
       asap_urgency_downtime = double(title: 'asap_urg, downtime',  tags: [asap_urgency_tag, downtime_tag])
 
-      sorted_time_groups = described_class.new(@times_of_day_tags, @task_categories).urgency_sorted_task_groups(
+      sorted_time_groups = described_class.new(@task_categories).urgency_sorted_task_groups(
         [
           # a time group, e.g. first thing
           [

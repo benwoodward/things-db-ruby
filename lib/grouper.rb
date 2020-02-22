@@ -1,10 +1,10 @@
 class Grouper
   attr_accessor :groupings
 
-  def initialize(tasks, tagging_groups, catch_all_category)
+  def initialize(tasks, tagging_groups, catch_all:)
     @tasks = tasks
     @tagging_groups = tagging_groups
-    @catch_all_category = catch_all_category
+    @catch_all_category = catch_all
   end
 
   def groupings
