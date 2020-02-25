@@ -1,15 +1,11 @@
 require 'queries'
 
 class Sorter
-  def initialize(task_categories)
-    @task_categories = task_categories
+  def initialize(tasks)
+    @tasks = tasks
   end
 
   def sort_tasks(time_group)
-  end
-
-  def group_by_task_type(tasks)
-    Grouper.new(tasks, @task_categories, catch_all: :other).group_by_tagging_categories
   end
 
   def group_by_admin_subgroup(tasks)
@@ -38,8 +34,6 @@ class Sorter
 
     result.flatten
   end
-
-
 
   def urgency_sorted_time_groups(time_groupings)
     time_groupings.inject([]) do |updated_time_groups, time_group|

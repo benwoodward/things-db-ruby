@@ -31,46 +31,6 @@ describe Sorter do
     end
   end
 
-  describe '#group_by_task_type' do
-    it 'groups tasks by type' do
-      chore_tag = double(title: 'what:chore')
-      errand_tag = double(title: 'what:errand')
-      phonecall_tag = double(title: 'what:phonecall')
-      message_tag = double(title: 'what:message')
-      email_tag = double(title: 'what:email')
-      other_tag = double(title: 'what:nonexistenttag')
-
-      chore1 = double(title: 'chore1', tags: [chore_tag])
-      chore2 = double(title: 'chore2', tags: [chore_tag])
-      errand1 = double(title: 'errand1', tags: [errand_tag])
-      errand2 = double(title: 'errand2', tags: [errand_tag])
-      phonecall = double(title: 'phonecall', tags: [phonecall_tag])
-      message = double(title: 'message', tags: [message_tag])
-      email = double(title: 'email', tags: [email_tag])
-      other = double(title: 'other', tags: [other_tag])
-
-      grouped_tasks = described_class.new(@task_categories).group_by_task_type([
-        chore1,
-        message,
-        errand1,
-        other,
-        email,
-        chore2,
-        phonecall,
-        errand2
-      ])
-
-      expect(grouped_tasks[:chores][0].title).to eq('chore1')
-      expect(grouped_tasks[:chores][1].title).to eq('chore2')
-      expect(grouped_tasks[:other][0].title).to eq('other')
-      expect(grouped_tasks[:errands][0].title).to eq('errand1')
-      expect(grouped_tasks[:errands][1].title).to eq('errand2')
-      expect(grouped_tasks[:admin][0].title).to eq('message').or eq('email').or eq('phonecall')
-      expect(grouped_tasks[:admin][1].title).to eq('message').or eq('email').or eq('phonecall')
-      expect(grouped_tasks[:admin][2].title).to eq('message').or eq('email').or eq('phonecall')
-    end
-  end
-
   describe '#urgency_sorted_time_groups' do
     it 'sorts double-nested groups of tasks by urgency tags' do
       # TAGS

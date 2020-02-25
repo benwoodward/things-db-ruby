@@ -11,7 +11,7 @@ TIMES_OF_DAY_TAGS = {
   evening:     ['when:evening']
 }
 
-TASK_CATEGORIES = {
+TASK_CATEGORY_TAGS = {
   chores:        ['what:chore'],
   focussed_work: ['what:focussed-work', 'what:code', 'what:research'],
   other:         nil,
@@ -20,4 +20,9 @@ TASK_CATEGORIES = {
   downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
 }
 
-Today.new(TIMES_OF_DAY_TAGS).sort_and_print
+Today.new(
+  times_of_day_tags: TIMES_OF_DAY_TAGS,
+  task_category_tags: TASK_CATEGORY_TAGS
+).sorted_tasks
+
+

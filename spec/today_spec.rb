@@ -54,7 +54,11 @@ describe Today do
         anytime_task2,
       ]
 
-      time_groups = described_class.new(tasks, @times_of_day_tags).time_groups()
+      time_groups = described_class.new(
+        tasks: tasks,
+        times_of_day_tags: @times_of_day_tags,
+        task_categories: @task_categories
+      ).time_groups()
 
       expect(time_groups[:first_thing].tasks[0].title).to eq('first_thing_task1').or eq('first_thing_task2')
       expect(time_groups[:first_thing].tasks[1].title).to eq('first_thing_task1').or eq('first_thing_task2')
@@ -70,7 +74,11 @@ describe Today do
 
     # XXX: This will fail if you don't have a today task tagged 'when:first-thing' available
     it 'loads tasks from database by default' do
-      time_groups = described_class.new(nil, @times_of_day_tags).time_groups()
+      time_groups = described_class.new(
+        tasks: nil,
+        times_of_day_tags: @times_of_day_tags,
+        task_categories: @task_categories
+      ).time_groups()
 
       expect(time_groups[:first_thing].tasks[0].title).to be_a(String)
     end

@@ -1,17 +1,24 @@
 class Today
-  attr_accessor :tasks
-  def initialize(tasks, times_of_day_tags)
-    @times_of_day_tags = times_of_day_tags
-    @times_of_day = times_of_day_tags.keys
-    @tasks = tasks
-    @sorter = Sorter.new(@task_categories)
+  attr_accessor :tasks, :time_groups
+  def initialize(opts = {})
+    @times_of_day_tags = opts[:times_of_day_tags]
+    @times_of_day      = opts[:times_of_day_tags].keys
+    @tasks             = opts[:tasks]
+  end
+
+  def sorted_tasks
+    time_groups
+  end
+
+  def sorter
+    Sorter.new(tasks)
   end
 
   def tasks
-    @tasks ||= todays_tasks
+    @tasks ||= database_tasks
   end
 
-  def todays_tasks
+  def database_tasks
     Queries.todays_tasks
   end
 
@@ -28,14 +35,10 @@ class Today
   end
 
   def create_time_group(tasks:)
-    TimeGroup.new(tasks)
+    TimeGroup.new(tasks: tasks)
   end
 
   def time_groups
-    create_time_groups
-  end
-
-  def sort_and_print
-    @sorter.sort_tasks(time_groups)
+    @time_groups ||= create_time_groups
   end
 end
