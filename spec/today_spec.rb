@@ -22,13 +22,13 @@ describe Today do
     }
   end
 
-  describe '#group_by_time_of_day' do
-    it 'groups tasks by time of day tags' do
+  describe '#time_groups' do
+    it 'converts an array of tasks into a hash of TimeGroups' do
       first_thing_tag = double(title: 'when:first-thing')
       morning_tag = double(title: 'when:morning')
       afternoon_tag = double(title: 'when:afternoon')
       evening_tag = double(title: 'when:evening')
-      anytime_tag = double(title: 'ojefoijvljfjk')
+      anytime_tag = double(title: 'randomstring')
 
       first_thing_task1 = double(title: 'first_thing_task1', tags: [first_thing_tag])
       first_thing_task2 = double(title: 'first_thing_task2', tags: [first_thing_tag])
@@ -41,7 +41,7 @@ describe Today do
       anytime_task1 = double(title: 'anytime_task1', tags: [anytime_tag])
       anytime_task2 = double(title: 'anytime_task2', tags: [anytime_tag])
 
-      grouped_tasks = described_class.new(@times_of_day_tags).group_by_time_of_day([
+      time_groups = described_class.new(@times_of_day_tags).time_groups([
         morning_task1,
         evening_task1,
         morning_task2,
@@ -54,16 +54,16 @@ describe Today do
         anytime_task2,
       ])
 
-      expect(grouped_tasks[:first_thing][0].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[:first_thing][1].title).to eq('first_thing_task1').or eq('first_thing_task2')
-      expect(grouped_tasks[:morning][0].title).to eq('morning_task1').or eq('morning_task2')
-      expect(grouped_tasks[:morning][1].title).to eq('morning_task1').or eq('morning_task2')
-      expect(grouped_tasks[:anytime][0].title).to eq('anytime_task1').or eq('anytime_task2')
-      expect(grouped_tasks[:anytime][1].title).to eq('anytime_task1').or eq('anytime_task2')
-      expect(grouped_tasks[:afternoon][0].title).to eq('afternoon_task1').or eq('afternoon_task2')
-      expect(grouped_tasks[:afternoon][1].title).to eq('afternoon_task1').or eq('afternoon_task2')
-      expect(grouped_tasks[:evening][0].title).to eq('evening_task1').or eq('evening_task2')
-      expect(grouped_tasks[:evening][1].title).to eq('evening_task1').or eq('evening_task2')
+      expect(time_groups[:first_thing].tasks[0].title).to eq('first_thing_task1').or eq('first_thing_task2')
+      expect(time_groups[:first_thing].tasks[1].title).to eq('first_thing_task1').or eq('first_thing_task2')
+      expect(time_groups[:morning].tasks[0].title).to eq('morning_task1').or eq('morning_task2')
+      expect(time_groups[:morning].tasks[1].title).to eq('morning_task1').or eq('morning_task2')
+      expect(time_groups[:anytime].tasks[0].title).to eq('anytime_task1').or eq('anytime_task2')
+      expect(time_groups[:anytime].tasks[1].title).to eq('anytime_task1').or eq('anytime_task2')
+      expect(time_groups[:afternoon].tasks[0].title).to eq('afternoon_task1').or eq('afternoon_task2')
+      expect(time_groups[:afternoon].tasks[1].title).to eq('afternoon_task1').or eq('afternoon_task2')
+      expect(time_groups[:evening].tasks[0].title).to eq('evening_task1').or eq('evening_task2')
+      expect(time_groups[:evening].tasks[1].title).to eq('evening_task1').or eq('evening_task2')
     end
   end
 end

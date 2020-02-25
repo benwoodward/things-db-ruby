@@ -5,7 +5,7 @@ class Sorter
     @task_categories = task_categories
   end
 
-  def sort_tasks(tasks)
+  def sort_tasks(time_group)
   end
 
   def group_by_task_type(tasks)
