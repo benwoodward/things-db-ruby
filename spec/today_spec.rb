@@ -41,7 +41,7 @@ describe Today do
       anytime_task1 = double(title: 'anytime_task1', tags: [anytime_tag])
       anytime_task2 = double(title: 'anytime_task2', tags: [anytime_tag])
 
-      time_groups = described_class.new(@times_of_day_tags).time_groups([
+      tasks = [
         morning_task1,
         evening_task1,
         morning_task2,
@@ -52,7 +52,9 @@ describe Today do
         first_thing_task2,
         afternoon_task2,
         anytime_task2,
-      ])
+      ]
+
+      time_groups = described_class.new(tasks, @times_of_day_tags).time_groups()
 
       expect(time_groups[:first_thing].tasks[0].title).to eq('first_thing_task1').or eq('first_thing_task2')
       expect(time_groups[:first_thing].tasks[1].title).to eq('first_thing_task1').or eq('first_thing_task2')
@@ -64,6 +66,13 @@ describe Today do
       expect(time_groups[:afternoon].tasks[1].title).to eq('afternoon_task1').or eq('afternoon_task2')
       expect(time_groups[:evening].tasks[0].title).to eq('evening_task1').or eq('evening_task2')
       expect(time_groups[:evening].tasks[1].title).to eq('evening_task1').or eq('evening_task2')
+    end
+
+    # XXX: This will fail if you don't have a today task tagged 'when:first-thing' available
+    it 'loads tasks from database by default' do
+      time_groups = described_class.new(nil, @times_of_day_tags).time_groups()
+
+      expect(time_groups[:first_thing].tasks[0].title).to be_a(String)
     end
   end
 end

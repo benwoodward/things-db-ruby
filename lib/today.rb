@@ -1,27 +1,29 @@
 class Today
-  def initialize(times_of_day_tags)
+  attr_accessor :tasks
+  def initialize(tasks, times_of_day_tags)
     @times_of_day_tags = times_of_day_tags
     @times_of_day = times_of_day_tags.keys
+    @tasks = tasks
     @sorter = Sorter.new(@task_categories)
+  end
+
+  def tasks
+    @tasks ||= todays_tasks
   end
 
   def todays_tasks
     Queries.todays_tasks
   end
 
-  def group_by_time_of_day(tasks)
+  def grouped_by_time_of_day
     Grouper.new(tasks, @times_of_day_tags, catch_all: :anytime).group_by_tagging_categories
   end
 
-  def create_time_groups_from_tasks(tasks, tags_to_group_by)
-    groupings = group_by_time_of_day(tasks)
-
+  def create_time_groups
     h = Hash.new
-
-    tags_to_group_by.each do |tag|
-      h[tag.to_sym] = create_time_group(tasks: groupings[tag.to_sym])
+    @times_of_day.each do |tag|
+      h[tag.to_sym] = create_time_group(tasks: grouped_by_time_of_day[tag.to_sym])
     end
-
     h
   end
 
@@ -29,8 +31,8 @@ class Today
     TimeGroup.new(tasks)
   end
 
-  def time_groups(tasks = todays_tasks)
-    create_time_groups_from_tasks(tasks, @times_of_day)
+  def time_groups
+    create_time_groups
   end
 
   def sort_and_print
