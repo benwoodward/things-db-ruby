@@ -23,7 +23,7 @@ describe Today do
   end
 
   describe '#time_groups' do
-    it 'converts an array of tasks into a hash of TimeGroups' do
+    it 'converts an array of tasks into a hash of SortedTimeGroups' do
       first_thing_tag = double(title: 'when:first-thing')
       morning_tag = double(title: 'when:morning')
       afternoon_tag = double(title: 'when:afternoon')

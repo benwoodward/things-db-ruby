@@ -35,7 +35,7 @@ class Today
   end
 
   def create_time_group(tasks:)
-    TimeGroup.new(tasks: tasks)
+    SortedTimeGroup.new(tasks: tasks)
   end
 
   def time_groups

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe TimeGroup do
+describe SortedTimeGroup do
   before do
     @task_categories = {
       chores:        ['what:chore'],
