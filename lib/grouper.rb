@@ -18,18 +18,29 @@ class Grouper
   end
 
   def group_by_tagging_categories
+    # require 'pry'; binding.pry
+
     @tasks.each do |task|
-      @tagging_groups.each do |category, tags|
-        if !contains_specified_tags?(task.tags, @tagging_groups.values.flatten)
-          groupings[@catch_all_category] << task
-        elsif contains_specified_tags?(task.tags, tags)
-          groupings[category] << task
-        end
+      if add_to_category?(task)
+        next
+      else
+        groupings[@catch_all_category] << task
       end
     end
 
     # groupings[:admin] = group_by_admin_subgroup(groupings[:admin])
     groupings
+  end
+
+  def add_to_category?(task)
+    @tagging_groups.each do |category, tags|
+      if contains_specified_tags?(task.tags, tags)
+        groupings[category] << task
+        return true
+      end
+    end
+
+    false
   end
 
   def contains_specified_tags?(tags, tag_names)

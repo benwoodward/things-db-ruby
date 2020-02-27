@@ -13,4 +13,7 @@ require 'models/task'
 require 'formatter'
 require 'queries'
 require 'grouper'
+require 'today'
+require 'sorted_time_group'
+require 'sorted_task_group'
 

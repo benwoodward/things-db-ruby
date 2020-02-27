@@ -1,7 +1,22 @@
 class SortedTimeGroup
+  attr_accessor :tasks, :task_groups
   def initialize(opts = {})
     @tasks = opts[:tasks]
     @task_categories = opts[:task_categories]
+    @time_of_day = opts[:time_of_day]
+  end
+
+  def name
+    @time_of_day
+  end
+
+  def has_tasks?
+    # require 'pry'; binding.pry
+    task_groups.values.select {|task_group| task_group.has_tasks? }.count > 0
+  end
+
+  def task_groups
+    @task_groups ||= create_task_groups
   end
 
   def tasks
@@ -10,14 +25,14 @@ class SortedTimeGroup
 
   def create_task_groups
     h = Hash.new
-    @task_categories.each do |tag|
-      h[tag.to_sym] = create_task_group(tasks: grouped_by_time_of_day[tag.to_sym])
+    @task_categories.keys.each do |task_type|
+      h[task_type.to_sym] = create_task_group(tasks: grouped_by_task_type[task_type.to_sym], type: task_type)
     end
     h
   end
 
-  def create_task_group(tasks:)
-    SortedTaskGroup.new(tasks: tasks)
+  def create_task_group(tasks:, type:)
+    SortedTaskGroup.new(tasks: tasks, type: type)
   end
 
   def grouped_by_task_type
