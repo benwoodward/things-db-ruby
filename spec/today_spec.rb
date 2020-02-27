@@ -95,7 +95,7 @@ describe Today do
       ).sorted_tasks()
 
       expect(today[:first_thing]).to be_a(SortedTimeGroup)
-      expect(today[:first_thing].task_groups.values.first).to be_a(SortedTaskGroup)
+      expect(today[:first_thing].groups.values.first).to be_a(SortedTaskGroup)
       # expect(sorted_tasks[:first_thing].tasks[0].title).to eq('first thing, chore, high urgency')
       # expect(sorted_tasks[:first_thing].tasks[1].title).to eq('first thing, chore, medium urgency')
       # expect(sorted_tasks[:first_thing].tasks[2].title).to eq('first thing, chore, low urgency')
@@ -107,7 +107,7 @@ describe Today do
         tasks: nil,
         times_of_day: @times_of_day_tags,
         task_categories: @task_categories
-      ).time_groups()
+      ).groups()
 
       expect(time_groups[:first_thing].tasks[0].title).to be_a(String)
     end

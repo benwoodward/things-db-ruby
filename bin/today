@@ -20,35 +20,29 @@ TASK_CATEGORY_TAGS = {
   downtime:      ['what:downtime', 'what:to-watch', 'what:to-read']
 }
 
-sorted_tasks = Today.new(
+today = Today.new(
   times_of_day: TIMES_OF_DAY_TAGS,
   task_categories: TASK_CATEGORY_TAGS
-).sorted_tasks
+)
 
-puts ''
-puts ''
-puts ''
-puts ''
-puts ''
-puts ''
-sorted_tasks.each do |time_of_day, sorted_time_group|
-  if sorted_time_group.has_tasks?
-    puts "==================#{sorted_time_group.name.upcase}====================="
-    # require 'pry'; binding.pry
-    sorted_time_group.task_groups.each do |task_type, task_group|
-      if !task_group.tasks.empty?
-        puts "#{task_group.title}........"
-        # require 'pry'; binding.pry
-        task_group.tasks.each do |task|
-          puts task.title
+class Printer
+  def self.recursive_group_printer(group)
+    if group.has_tasks?
+      if group.has_groups?
+        puts group.print_heading
+        group.groups.each do |_, group|
+          # require 'pry'; binding.pry
+          self.recursive_group_printer(group)
         end
-        puts ''
-        puts ''
+      else
+        puts group.print_heading
+        group.tasks.each do |task|
+          puts "      #{task.title}"
+        end
       end
     end
   end
 end
 
-# Queries.todays_tasks.each do |task|
-#   puts task.title
-# end
+puts "\n\n\n\n\n\n"
+Printer.recursive_group_printer(today)
