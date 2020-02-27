@@ -1,6 +1,7 @@
 class Today
   attr_accessor :tasks, :time_groups
   def initialize(opts = {})
+    @task_categories = opts[:task_categories]
     @times_of_day_tags = opts[:times_of_day_tags]
     @times_of_day      = opts[:times_of_day_tags].keys
     @tasks             = opts[:tasks]
@@ -35,7 +36,7 @@ class Today
   end
 
   def create_time_group(tasks:)
-    SortedTimeGroup.new(tasks: tasks)
+    SortedTimeGroup.new(tasks: tasks, task_categories: @task_categories)
   end
 
   def time_groups

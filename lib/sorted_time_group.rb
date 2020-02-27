@@ -11,7 +11,7 @@ class SortedTimeGroup
   def create_task_groups
     h = Hash.new
     @task_categories.each do |tag|
-      h[tag.to_sym] = create_time_group(tasks: grouped_by_time_of_day[tag.to_sym])
+      h[tag.to_sym] = create_task_group(tasks: grouped_by_time_of_day[tag.to_sym])
     end
     h
   end
