@@ -42,7 +42,10 @@ class SortedTimeGroup
   end
 
   def create_group(tasks:, type:)
-    SortedTaskGroup.new(tasks: tasks, type: type)
+    SortedTaskGroup.new({
+      tasks: tasks,
+      type: type
+    })
   end
 
   def grouped_by_task_type

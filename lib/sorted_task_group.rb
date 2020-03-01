@@ -3,6 +3,8 @@ class SortedTaskGroup
   def initialize(opts = {})
     @tasks = opts[:tasks]
     @type  = opts[:type]
+
+    sort
   end
 
   def heading
@@ -28,6 +30,16 @@ class SortedTaskGroup
 
   def groups
     {}
+  end
+
+  def sort
+    sort_by_importance
+  end
+
+  def sort_by_importance
+    tasks.sort_by! do |task|
+      task.importance
+    end.reverse!
   end
 end
 

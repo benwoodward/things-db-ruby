@@ -41,7 +41,11 @@ class Today
   end
 
   def create_group(tasks:, time_of_day:)
-    SortedTimeGroup.new(tasks: tasks, task_categories: @task_categories, time_of_day: time_of_day)
+    SortedTimeGroup.new({
+      tasks: tasks,
+      task_categories: @task_categories,
+      time_of_day: time_of_day
+    })
   end
 
   def grouped_by_time_of_day

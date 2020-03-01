@@ -21,7 +21,7 @@ TASK_CATEGORY_TAGS = {
 }
 
 today = Today.new(
-  times_of_day: TIMES_OF_DAY_TAGS,
+  times_of_day:    TIMES_OF_DAY_TAGS,
   task_categories: TASK_CATEGORY_TAGS
 )
 
@@ -31,7 +31,6 @@ class Printer
       if group.has_groups?
         puts group.print_heading
         group.groups.each do |_, group|
-          # require 'pry'; binding.pry
           self.recursive_group_printer(group)
         end
       else
