@@ -1,3 +1,12 @@
+<a name="v0.2.0"></a>
+### v0.2.0 (2020-03-01)
+
+
+#### Features
+
+* Sort task groups by imp: tags automatically	 ([ea5cd07](/../../commit/ea5cd07))
+
+
 <a name="v0.1.0"></a>
 ### v0.1.0 (2020-02-28)
 
