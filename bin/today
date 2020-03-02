@@ -32,7 +32,6 @@ today = Today.new(
 
 markdown = MarkdownRenderer.new.render(today)
 escaped_markdown = Addressable::URI.encode_component(markdown, Addressable::URI::CharacterClasses::UNRESERVED)
-bear_url = "bear://x-callback-url/create?open_note=yes&show_window=yes&text=#{escaped_markdown}"
-puts bear_url
+bear_url = "bear://x-callback-url/create?open_note=yes&show_window=yes&tags=personal%2Ftodos&text=#{escaped_markdown}"
 %x[open "#{bear_url}"]
 

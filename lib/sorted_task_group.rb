@@ -8,7 +8,7 @@ class SortedTaskGroup
   end
 
   def heading
-    @type.to_s.humanize.titleize
+    "\n### #{@type.to_s.humanize.titleize}\n"
   end
 
   def has_tasks?

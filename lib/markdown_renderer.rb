@@ -6,7 +6,7 @@ class MarkdownRenderer
   def render(group)
     if group.has_tasks?
       if group.has_groups?
-        @task_group_markdown += "\n\n## #{group.heading}\n"
+        @task_group_markdown += group.heading
         group.groups.each do |_, group|
           render(group)
         end
@@ -19,7 +19,7 @@ class MarkdownRenderer
 
   def task_group_content(group)
     if group.has_tasks?
-      @task_group_markdown += "\n### #{group.heading}\n"
+      @task_group_markdown += group.heading
       group.tasks.each do |task|
         @task_group_markdown += "- [ ] [#{task.title}](#{task.things_url})\n"
       end

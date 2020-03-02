@@ -7,7 +7,7 @@ class Today
   end
 
   def heading
-    Date.today.strftime("%A %B %d, %Y")
+    "# Tasks - #{Date.today.strftime("%A %B %d, %Y")}"
   end
 
   def has_tasks?

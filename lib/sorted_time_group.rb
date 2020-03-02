@@ -7,7 +7,7 @@ class SortedTimeGroup
   end
 
   def heading
-    @time_of_day.to_s.humanize.titleize
+    "\n\n\n## #{@time_of_day.to_s.humanize.titleize}"
   end
 
   def has_tasks?
