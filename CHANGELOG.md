@@ -1,3 +1,12 @@
+<a name="v0.3.0"></a>
+### v0.3.0 (2020-03-02)
+
+
+#### Features
+
+* Render to HTML using Slim	 ([55b5faf](/../../commit/55b5faf))
+
+
 <a name="v0.2.0"></a>
 ### v0.2.0 (2020-03-01)
 
