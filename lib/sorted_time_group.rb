@@ -7,14 +7,7 @@ class SortedTimeGroup
   end
 
   def heading
-    @time_of_day
-  end
-
-  def print_heading
-    puts ''
-    puts "\e[32m*********\e[m"
-    puts "\e[32m#{heading.upcase}\e[m"
-    puts "\e[32m*********\e[m"
+    @time_of_day.to_s.humanize.titleize
   end
 
   def has_tasks?

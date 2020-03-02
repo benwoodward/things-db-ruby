@@ -6,13 +6,10 @@ class SlimRenderer
   end
 
   def render(group)
-    @layout.render(group) do
-      render_task_group(group) if group.has_groups?
+    render_task_group(group)
+    @layout.render do
+      @task_group_html
     end
-  end
-
-  def output
-    @task_group_html
   end
 
   def render_task_group(group)

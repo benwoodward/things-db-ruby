@@ -20,4 +20,8 @@ class Task < Sequel::Model(DB[:TMTask])
       importance_tag_scores[tag.title.to_sym]
     end.reverse
   end
+
+  def things_url
+    "things:///show?id=#{uuid}"
+  end
 end

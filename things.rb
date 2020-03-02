@@ -2,6 +2,8 @@ $LOAD_PATH.unshift File.expand_path(".", "lib")
 
 require 'rubygems'
 require 'bundler/setup'
+require 'active_support/core_ext/string'
+
 require 'sequel'
 require 'sqlite3'
 require 'pry'

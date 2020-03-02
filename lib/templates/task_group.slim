@@ -1,5 +1,9 @@
 - if has_tasks?
   h3= heading
   ul
-    - tasks.each do |task|
-      li=task.title
+  - tasks.each do |task|
+    li
+      input type="checkbox" name="#{task.uuid}"
+      label for="#{task.uuid}"
+        a href="#{task.things_url}"
+          =task.title

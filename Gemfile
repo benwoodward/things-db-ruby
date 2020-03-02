@@ -8,6 +8,9 @@ gem 'addressable'
 gem 'pry'
 gem 'rake'
 gem 'slim'
+gem 'reverse_markdown'
+gem 'addressable'
+gem 'activesupport'
 
 group :test do
   gem 'rspec'

@@ -10,12 +10,6 @@ class Today
     Date.today.strftime("%A %B %d, %Y")
   end
 
-  def print_heading
-    puts "------------------------------------------"
-    puts "|         #{heading}       |"
-    puts "------------------------------------------"
-  end
-
   def has_tasks?
     groups.values.select {|time_group| time_group.has_tasks? }.count > 0
   end

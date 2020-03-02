@@ -4,7 +4,9 @@ $LOAD_PATH.unshift File.expand_path("..", "lib")
 require 'tilt'
 require 'slim'
 require 'things'
-require 'slim_renderer'
+require 'markdown_renderer'
+require 'addressable/uri'
+
 
 TIMES_OF_DAY_TAGS = {
   first_thing: ['when:first-thing'],
@@ -28,8 +30,9 @@ today = Today.new(
   task_categories: TASK_CATEGORY_TAGS
 )
 
-puts "\n\n\n\n\n\n"
+markdown = MarkdownRenderer.new.render(today)
+escaped_markdown = Addressable::URI.encode_component(markdown, Addressable::URI::CharacterClasses::UNRESERVED)
+bear_url = "bear://x-callback-url/create?open_note=yes&show_window=yes&text=#{escaped_markdown}"
+puts bear_url
+%x[open "#{bear_url}"]
 
-renderer = SlimRenderer.new
-renderer.render(today)
-puts renderer.output
