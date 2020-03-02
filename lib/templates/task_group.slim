@@ -1,0 +1,5 @@
+- if has_tasks?
+  h3= heading
+  ul
+    - tasks.each do |task|
+      li=task.title

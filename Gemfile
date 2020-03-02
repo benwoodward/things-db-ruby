@@ -7,6 +7,7 @@ gem 'sqlite3'
 gem 'addressable'
 gem 'pry'
 gem 'rake'
+gem 'slim'
 
 group :test do
   gem 'rspec'

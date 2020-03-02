@@ -1,7 +1,10 @@
 #!/usr/bin/env ruby
 
 $LOAD_PATH.unshift File.expand_path("..", "lib")
+require 'tilt'
+require 'slim'
 require 'things'
+require 'slim_renderer'
 
 TIMES_OF_DAY_TAGS = {
   first_thing: ['when:first-thing'],
@@ -25,23 +28,8 @@ today = Today.new(
   task_categories: TASK_CATEGORY_TAGS
 )
 
-class Printer
-  def self.recursive_group_printer(group)
-    if group.has_tasks?
-      if group.has_groups?
-        puts group.print_heading
-        group.groups.each do |_, group|
-          self.recursive_group_printer(group)
-        end
-      else
-        puts group.print_heading
-        group.tasks.each do |task|
-          puts "      #{task.title}"
-        end
-      end
-    end
-  end
-end
-
 puts "\n\n\n\n\n\n"
-Printer.recursive_group_printer(today)
+
+renderer = SlimRenderer.new
+renderer.render(today)
+puts renderer.output
