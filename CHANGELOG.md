@@ -1,3 +1,12 @@
+<a name="v0.4.0"></a>
+### v0.4.0 (2020-03-02)
+
+
+#### Features
+
+* Render to Markdown, and add to new Bear document	 ([95b764e](/../../commit/95b764e))
+
+
 <a name="v0.3.0"></a>
 ### v0.3.0 (2020-03-02)
 
