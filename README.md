@@ -1,3 +1,8 @@
+## Roadmap
+- Replace Group objects (`Today`, `SortedTimeGroup`, `SortedTaskGroup`) with a single generic group object
+- If there are not enough tasks on Today, add some from Anytime
+- Auto-detect tags and tag relationships on sorting, instead of relying on `TAG_CATEGORIES` configuration
+  Ideally, pass in the names of the parent tags in the order to sort by. e.g. `bin/today 'when:,what:'`
 Currently this script does the following:
 
 ## Reading from Things.app

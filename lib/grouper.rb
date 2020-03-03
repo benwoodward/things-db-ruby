@@ -18,8 +18,6 @@ class Grouper
   end
 
   def group_by_tagging_categories
-    # require 'pry'; binding.pry
-
     @tasks.each do |task|
       if add_to_category?(task)
         next
